@@ -49,9 +49,9 @@ defmodule LcdDisplay.HD44780.GPIO do
   @entry_increment 0x01
 
   # flags for display on/off control
-  @ctl_display 0x04
-  @ctl_cursor 0x02
-  @ctl_blink 0x01
+  @display_on 0x04
+  @cursor_on 0x02
+  @blink_on 0x01
 
   # flags for display/cursor shift
   @shift_display 0x08
@@ -168,43 +168,43 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   def execute(display, {:cursor, :off}) do
-    {:ok, disable_feature(display, :display_control, @ctl_cursor)}
+    {:ok, disable_display_control_flag(display, @cursor_on)}
   end
 
   def execute(display, {:cursor, :on}) do
-    {:ok, enable_feature(display, :display_control, @ctl_cursor)}
+    {:ok, enable_display_control_flag(display, @cursor_on)}
   end
 
   def execute(display, {:blink, :off}) do
-    {:ok, disable_feature(display, :display_control, @ctl_blink)}
+    {:ok, disable_display_control_flag(display, @blink_on)}
   end
 
   def execute(display, {:blink, :on}) do
-    {:ok, enable_feature(display, :display_control, @ctl_blink)}
+    {:ok, enable_display_control_flag(display, @blink_on)}
   end
 
   def execute(display, {:display, :off}) do
-    {:ok, disable_feature(display, :display_control, @ctl_display)}
+    {:ok, disable_display_control_flag(display, @display_on)}
   end
 
   def execute(display, {:display, :on}) do
-    {:ok, enable_feature(display, :display_control, @ctl_display)}
+    {:ok, enable_display_control_flag(display, @display_on)}
   end
 
   def execute(display, {:autoscroll, :off}) do
-    {:ok, disable_feature(display, :entry_mode, @entry_increment)}
+    {:ok, disable_entry_mode_flag(display, @entry_increment)}
   end
 
   def execute(display, {:autoscroll, :on}) do
-    {:ok, enable_feature(display, :entry_mode, @entry_increment)}
+    {:ok, enable_entry_mode_flag(display, @entry_increment)}
   end
 
   def execute(display, :entry_right_to_left) do
-    {:ok, disable_feature(display, :entry_mode, @entry_left)}
+    {:ok, disable_entry_mode_flag(display, @entry_left)}
   end
 
   def execute(display, :entry_left_to_right) do
-    {:ok, enable_feature(display, :entry_mode, @entry_left)}
+    {:ok, enable_entry_mode_flag(display, @entry_left)}
   end
 
   def execute(display, {:backlight, :off}), do: {:ok, set_backlight(display, false)}
@@ -249,9 +249,9 @@ defmodule LcdDisplay.HD44780.GPIO do
 
   def execute(display, _), do: {:unsupported, display}
 
-  defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(3)
+  defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 
-  defp home(display), do: display |> write_instruction(@cmd_return_home) |> delay(3)
+  defp home(display), do: display |> write_instruction(@cmd_return_home) |> delay(2)
 
   ##
   ## Low level data pushing commands
@@ -277,16 +277,24 @@ defmodule LcdDisplay.HD44780.GPIO do
     %{display | backlight: flag} |> write_data(0)
   end
 
-  defp disable_feature(display, feature_key, flag)
-       when is_atom(feature_key) and is_integer(flag) do
-    %{display | feature_key => Map.fetch!(display, feature_key) &&& ~~~flag}
-    |> write_feature(feature_key)
+  defp disable_entry_mode_flag(display, flag) do
+    entry_mode = display.entry_mode &&& ~~~flag
+    %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
   end
 
-  defp enable_feature(display, feature_key, flag)
-       when is_atom(feature_key) and is_integer(flag) do
-    %{display | feature_key => Map.fetch!(display, feature_key) ||| flag}
-    |> write_feature(feature_key)
+  defp enable_entry_mode_flag(display, flag) do
+    entry_mode = display.entry_mode ||| flag
+    %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
+  end
+
+  defp disable_display_control_flag(display, flag) do
+    display_control = display.display_control &&& ~~~flag
+    %{display | display_control: display_control} |> write_feature(:display_control)
+  end
+
+  defp enable_display_control_flag(display, flag) do
+    display_control = display.display_control ||| flag
+    %{display | display_control: display_control} |> write_feature(:display_control)
   end
 
   # Write a feature register to the controller and return the state.

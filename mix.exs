@@ -31,7 +31,8 @@ defmodule LcdDisplay.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:circuits_gpio, "~> 0.4"},
       {:circuits_i2c, "~> 0.1"},
-      {:mox, "~> 1.0.0", only: :test}
+      {:mox, "~> 1.0.0", only: :test},
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
     ]
   end
 end
