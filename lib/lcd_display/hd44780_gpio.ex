@@ -65,48 +65,52 @@ defmodule LcdDisplay.HD44780.GPIO do
   @required_config_keys [:name, :rs, :en, :d4, :d5, :d6, :d7, :rows, :cols]
   @optional_config_keys [:font_size]
 
+  @doc """
+  Initializes the LCD driver and returns the initial display state.
+  """
   @impl true
   def start(opts) do
-    config_key_allowlist = @required_config_keys ++ @optional_config_keys
-
-    # Ensure that the datatype is map and remove garbage keys.
-    opts = opts |> Enum.into(%{}) |> Map.take(config_key_allowlist)
-
-    # Raise an error when required key is missing.
-    @required_config_keys |> Enum.each(&Map.fetch!(opts, &1))
-
     number_of_lines = if opts[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
     font_size = if opts[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
 
-    display =
-      Map.merge(opts, %{
-        driver_module: __MODULE__,
-        rows: opts[:rows] || 2,
-        cols: opts[:cols] || 16,
-        # Initial values for features that we can change later.
-        # They will be updated when the "command" function is called.
-        display_control: @cmd_display_control,
-        entry_mode: @cmd_entry_mode_set,
-        backlight: true
-      })
-      |> open_gpio_pins(@pins_4bit)
-      |> register_select(0)
-      |> enable(0)
-      |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)
-
-    {:ok, display}
-  end
-
-  @impl true
-  def stop(display) do
-    execute(display, {:display, :off})
-    :ok
+    {:ok,
+     initial_state(opts)
+     |> register_select(0)
+     |> enable(0)
+     |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
   end
 
   @doc """
-  Initializes the display for 4-Bit Interface. See Hitachi HD44780 datasheet page 46 for details.
+  Stops the LCD driver.
   """
-  def initialize_display(display, function_set: function_set) do
+  @impl true
+  def stop(display) do
+    execute(display, {:display, false})
+    :ok
+  end
+
+  defp initial_state(opts) do
+    # Ensure that the datatype is map and remove garbage keys.
+    opts = Map.take(opts, @required_config_keys ++ @optional_config_keys)
+
+    # Raise an error when required key is missing.
+    Enum.each(@required_config_keys, &Map.fetch!(opts, &1))
+
+    Map.merge(opts, %{
+      driver_module: __MODULE__,
+      rows: opts[:rows] || 2,
+      cols: opts[:cols] || 16,
+      # Initial values for features that we can change later.
+      # They will be updated when the "command" function is called.
+      display_control: @cmd_display_control,
+      entry_mode: @cmd_entry_mode_set,
+      backlight: true
+    })
+    |> open_gpio_pins(@pins_4bit)
+  end
+
+  # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
+  defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
     |> write_four_bits(0x03)
@@ -140,6 +144,9 @@ defmodule LcdDisplay.HD44780.GPIO do
     |> Map.merge(config)
   end
 
+  @doc """
+  Executes the specified command and returns a new display state.
+  """
   @impl true
   def execute(display, :clear) do
     clear(display)
@@ -167,35 +174,35 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok, set_cursor(display, row, col)}
   end
 
-  def execute(display, {:cursor, :off}) do
+  def execute(display, {:cursor, false}) do
     {:ok, disable_display_control_flag(display, @cursor_on)}
   end
 
-  def execute(display, {:cursor, :on}) do
+  def execute(display, {:cursor, true}) do
     {:ok, enable_display_control_flag(display, @cursor_on)}
   end
 
-  def execute(display, {:blink, :off}) do
+  def execute(display, {:blink, false}) do
     {:ok, disable_display_control_flag(display, @blink_on)}
   end
 
-  def execute(display, {:blink, :on}) do
+  def execute(display, {:blink, true}) do
     {:ok, enable_display_control_flag(display, @blink_on)}
   end
 
-  def execute(display, {:display, :off}) do
+  def execute(display, {:display, false}) do
     {:ok, disable_display_control_flag(display, @display_on)}
   end
 
-  def execute(display, {:display, :on}) do
+  def execute(display, {:display, true}) do
     {:ok, enable_display_control_flag(display, @display_on)}
   end
 
-  def execute(display, {:autoscroll, :off}) do
+  def execute(display, {:autoscroll, false}) do
     {:ok, disable_entry_mode_flag(display, @entry_increment)}
   end
 
-  def execute(display, {:autoscroll, :on}) do
+  def execute(display, {:autoscroll, true}) do
     {:ok, enable_entry_mode_flag(display, @entry_increment)}
   end
 
@@ -207,8 +214,8 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok, enable_entry_mode_flag(display, @entry_left)}
   end
 
-  def execute(display, {:backlight, :off}), do: {:ok, set_backlight(display, false)}
-  def execute(display, {:backlight, :on}), do: {:ok, set_backlight(display, true)}
+  def execute(display, {:backlight, false}), do: {:ok, set_backlight(display, false)}
+  def execute(display, {:backlight, true}), do: {:ok, set_backlight(display, true)}
 
   def execute(display, {:scroll, 0}), do: {:ok, display}
 

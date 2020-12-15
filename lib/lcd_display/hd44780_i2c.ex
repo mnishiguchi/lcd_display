@@ -5,7 +5,7 @@ defmodule LcdDisplay.HD44780.I2C do
   ## Examples
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.I2C.start([])
+      {:ok, display} = HD44780.I2C.start()
 
       # Run a command and the display state will be updated.
       {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
@@ -58,39 +58,47 @@ defmodule LcdDisplay.HD44780.I2C do
   @default_rows 2
   @default_cols 16
 
+  @doc """
+  Initializes the LCD driver and returns the initial display state.
+  """
   @impl true
-  def start(opts \\ []) when is_list(opts) do
-    i2c_device = opts[:i2c_device] || "i2c-1"
-    {:ok, i2c_ref} = SerialBus.open(i2c_device)
-
+  def start(opts \\ %{}) do
     number_of_lines = if opts[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
     font_size = if opts[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
 
-    display =
-      %{
-        driver_module: __MODULE__,
-        name: opts[:name] || i2c_device,
-        i2c_ref: i2c_ref,
-        i2c_address: opts[:i2c_address] || @default_i2c_address,
-        rows: opts[:rows] || @default_rows,
-        cols: opts[:cols] || @default_cols,
-
-        # Initial values for features that we can change later.
-        entry_mode: @cmd_entry_mode_set ||| @entry_left,
-        display_control: @cmd_display_control ||| @display_on,
-        backlight: true
-      }
-      |> expander_write(@backlight_on)
-      |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)
-
-    {:ok, display}
+    {:ok,
+     initial_state(opts)
+     |> expander_write(@backlight_on)
+     |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
   end
 
+  @doc """
+  Stops the LCD driver.
+  """
   @impl true
   def stop(display) do
-    execute(display, {:display, :off})
+    execute(display, {:display, false})
     Circuits.I2C.close(display.i2c_device)
     :ok
+  end
+
+  defp initial_state(opts) do
+    i2c_device = opts[:i2c_device] || "i2c-1"
+    {:ok, i2c_ref} = SerialBus.open(i2c_device)
+
+    %{
+      driver_module: __MODULE__,
+      name: opts[:name] || i2c_device,
+      i2c_ref: i2c_ref,
+      i2c_address: opts[:i2c_address] || @default_i2c_address,
+      rows: opts[:rows] || @default_rows,
+      cols: opts[:cols] || @default_cols,
+
+      # Initial values for features that we can change later.
+      entry_mode: @cmd_entry_mode_set ||| @entry_left,
+      display_control: @cmd_display_control ||| @display_on,
+      backlight: true
+    }
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
@@ -115,6 +123,9 @@ defmodule LcdDisplay.HD44780.I2C do
     |> write_feature(:entry_mode)
   end
 
+  @doc """
+  Executes the specified command and returns a new display state.
+  """
   @impl true
   def execute(display, :clear) do
     clear(display)
@@ -142,35 +153,35 @@ defmodule LcdDisplay.HD44780.I2C do
     {:ok, set_cursor(display, row, col)}
   end
 
-  def execute(display, {:cursor, :off}) do
+  def execute(display, {:cursor, false}) do
     {:ok, disable_display_control_flag(display, @cursor_on)}
   end
 
-  def execute(display, {:cursor, :on}) do
+  def execute(display, {:cursor, true}) do
     {:ok, enable_display_control_flag(display, @cursor_on)}
   end
 
-  def execute(display, {:blink, :off}) do
+  def execute(display, {:blink, false}) do
     {:ok, disable_display_control_flag(display, @blink_on)}
   end
 
-  def execute(display, {:blink, :on}) do
+  def execute(display, {:blink, true}) do
     {:ok, enable_display_control_flag(display, @blink_on)}
   end
 
-  def execute(display, {:display, :off}) do
+  def execute(display, {:display, false}) do
     {:ok, disable_display_control_flag(display, @display_on)}
   end
 
-  def execute(display, {:display, :on}) do
+  def execute(display, {:display, true}) do
     {:ok, enable_display_control_flag(display, @display_on)}
   end
 
-  def execute(display, {:autoscroll, :off}) do
+  def execute(display, {:autoscroll, false}) do
     {:ok, disable_entry_mode_flag(display, @entry_increment)}
   end
 
-  def execute(display, {:autoscroll, :on}) do
+  def execute(display, {:autoscroll, true}) do
     {:ok, enable_entry_mode_flag(display, @entry_increment)}
   end
 
@@ -182,8 +193,8 @@ defmodule LcdDisplay.HD44780.I2C do
     {:ok, enable_entry_mode_flag(display, @entry_left)}
   end
 
-  def execute(display, {:backlight, :off}), do: {:ok, set_backlight(display, false)}
-  def execute(display, {:backlight, :on}), do: {:ok, set_backlight(display, true)}
+  def execute(display, {:backlight, false}), do: {:ok, set_backlight(display, false)}
+  def execute(display, {:backlight, true}), do: {:ok, set_backlight(display, true)}
 
   def execute(display, {:scroll, 0}), do: {:ok, display}
 

@@ -25,3 +25,5 @@ lcd_display-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+
+.elixir_ls

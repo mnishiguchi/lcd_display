@@ -3,32 +3,49 @@ defmodule LcdDisplay.DisplayDriver do
   Defines a behaviour required for an LCD driver.
   """
 
-  @type display :: map
+  @typedoc """
+  Type that represents the display state.
+  """
+  @type display :: %{
+          required(:driver_module) => atom(),
+          required(:name) => String.t(),
+          required(:rows) => integer(),
+          required(:cols) => integer(),
+          required(:entry_mode) => integer(),
+          required(:display_control) => integer(),
+          required(:backlight) => boolean()
+        }
 
+  @typedoc """
+  Type that represents an available display feature.
+  """
   @type feature :: :entry_mode | :display_control
 
+  @typedoc """
+  Type that represents a supported display command.
+  """
   @type command ::
           :clear
           | :home
           | {:print, String.t()}
-          | {:write, charlist}
-          | {:set_cursor, integer, integer}
-          | {:cursor, :on | :off}
-          | {:blink, :on | :off}
-          | {:display, :on | :off}
-          | {:autoscroll, :on | :off}
+          | {:write, charlist()}
+          | {:set_cursor, integer(), integer()}
+          | {:cursor, boolean()}
+          | {:blink, boolean()}
+          | {:display, boolean()}
+          | {:autoscroll, boolean()}
           | :entry_right_to_left
           | :entry_left_to_right
-          | {:backlight, :on | :off}
-          | {:scroll, integer}
-          | {:left, integer}
-          | {:right, integer}
-          | {:char, integer, byte}
+          | {:backlight, boolean()}
+          | {:scroll, integer()}
+          | {:left, integer()}
+          | {:right, integer()}
+          | {:char, integer(), byte()}
 
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
-  @callback start(list) :: {:ok | :error, display}
+  @callback start(map) :: {:ok | :error, display}
 
   @doc """
   Stops the LCD driver.
@@ -38,5 +55,5 @@ defmodule LcdDisplay.DisplayDriver do
   @doc """
   Executes the specified command and returns a new display state.
   """
-  @callback execute(display, command()) :: {:ok | :error, display}
+  @callback execute(display, command) :: {:ok | :error, display}
 end

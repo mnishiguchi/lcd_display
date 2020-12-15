@@ -62,12 +62,12 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:print, "Hello"})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:write, 'H'})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:set_cursor, 2, 2})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, :off})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, :on})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:blink, :off})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:blink, :on})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:autoscroll, :off})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:autoscroll, :on})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, false})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, true})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:blink, false})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:blink, true})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:autoscroll, false})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:autoscroll, true})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:scroll, 2})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:left, 2})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:right, 2})
@@ -76,8 +76,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
 
     test "execute unsupported commands", %{display: d} do
       assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:write, "Hello"})
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:entry_left_to_right, :off})
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:cursor, false})
+      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:entry_left_to_right, false})
       assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:char, "invalid args"})
     end
 
@@ -87,19 +86,19 @@ defmodule LcdDisplay.HD44780.GPIOTest do
     end
 
     test "change display_control", %{display: d} do
-      assert {:ok, %{display_control: 8}} = HD44780.GPIO.execute(d, {:display, :off})
-      assert {:ok, %{display_control: 12}} = HD44780.GPIO.execute(d, {:display, :on})
+      assert {:ok, %{display_control: 8}} = HD44780.GPIO.execute(d, {:display, false})
+      assert {:ok, %{display_control: 12}} = HD44780.GPIO.execute(d, {:display, true})
     end
 
     test "change backlight", %{display: d} do
-      assert {:ok, %{backlight: false}} = HD44780.GPIO.execute(d, {:backlight, :off})
-      assert {:ok, %{backlight: true}} = HD44780.GPIO.execute(d, {:backlight, :on})
+      assert {:ok, %{backlight: false}} = HD44780.GPIO.execute(d, {:backlight, false})
+      assert {:ok, %{backlight: true}} = HD44780.GPIO.execute(d, {:backlight, true})
     end
   end
 
   defp start_display do
     {:ok, display} =
-      HD44780.GPIO.start(
+      HD44780.GPIO.start(%{
         name: "display 1",
         rows: 2,
         cols: 16,
@@ -110,7 +109,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
         d5: 8,
         d6: 9,
         d7: 10
-      )
+      })
 
     display
   end

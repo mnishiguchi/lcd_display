@@ -14,9 +14,10 @@ defmodule LcdDisplay do
       alias LcdDisplay.HD44780
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.I2C.start([])
+      {:ok, display} = HD44780.I2C.start()
 
       # Run a command and the display state will be updated.
       {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
+      {:ok, display} = HD44780.I2C.execute(display, :clear)
   """
 end

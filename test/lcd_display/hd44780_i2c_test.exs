@@ -20,7 +20,7 @@ defmodule LcdDisplay.HD44780.I2CTest do
   end
 
   test "start with no options" do
-    assert {:ok, display} = HD44780.I2C.start([])
+    assert {:ok, display} = HD44780.I2C.start()
 
     assert %{
              driver_module: LcdDisplay.HD44780.I2C,
@@ -38,7 +38,7 @@ defmodule LcdDisplay.HD44780.I2CTest do
   end
 
   test "start with some options" do
-    opts = [i2c_address: 0x3F, name: "i2c-2", rows: 4, cols: 20]
+    opts = %{i2c_address: 0x3F, name: "i2c-2", rows: 4, cols: 20}
     assert {:ok, %{i2c_address: 0x3F, name: "i2c-2", rows: 4, cols: 20}} = HD44780.I2C.start(opts)
   end
 
@@ -53,12 +53,12 @@ defmodule LcdDisplay.HD44780.I2CTest do
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:print, "Hello"})
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:write, 'H'})
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:set_cursor, 2, 2})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:cursor, :off})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:cursor, :on})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:blink, :off})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:blink, :on})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:autoscroll, :off})
-      assert {:ok, %{}} = HD44780.I2C.execute(d, {:autoscroll, :on})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:cursor, false})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:cursor, true})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:blink, false})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:blink, true})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:autoscroll, false})
+      assert {:ok, %{}} = HD44780.I2C.execute(d, {:autoscroll, true})
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:scroll, 2})
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:left, 2})
       assert {:ok, %{}} = HD44780.I2C.execute(d, {:right, 2})
@@ -67,8 +67,7 @@ defmodule LcdDisplay.HD44780.I2CTest do
 
     test "execute unsupported commands", %{display: d} do
       assert {:unsupported, %{}} = HD44780.I2C.execute(d, {:write, "Hello"})
-      assert {:unsupported, %{}} = HD44780.I2C.execute(d, {:entry_left_to_right, :off})
-      assert {:unsupported, %{}} = HD44780.I2C.execute(d, {:cursor, false})
+      assert {:unsupported, %{}} = HD44780.I2C.execute(d, {:entry_left_to_right, false})
       assert {:unsupported, %{}} = HD44780.I2C.execute(d, {:char, "invalid args"})
     end
 
@@ -78,18 +77,18 @@ defmodule LcdDisplay.HD44780.I2CTest do
     end
 
     test "change display_control", %{display: d} do
-      assert {:ok, %{display_control: 8}} = HD44780.I2C.execute(d, {:display, :off})
-      assert {:ok, %{display_control: 12}} = HD44780.I2C.execute(d, {:display, :on})
+      assert {:ok, %{display_control: 8}} = HD44780.I2C.execute(d, {:display, false})
+      assert {:ok, %{display_control: 12}} = HD44780.I2C.execute(d, {:display, true})
     end
 
     test "change backlight", %{display: d} do
-      assert {:ok, %{backlight: false}} = HD44780.I2C.execute(d, {:backlight, :off})
-      assert {:ok, %{backlight: true}} = HD44780.I2C.execute(d, {:backlight, :on})
+      assert {:ok, %{backlight: false}} = HD44780.I2C.execute(d, {:backlight, false})
+      assert {:ok, %{backlight: true}} = HD44780.I2C.execute(d, {:backlight, true})
     end
   end
 
   defp default_display do
-    {:ok, display} = HD44780.I2C.start()
+    {:ok, display} = HD44780.I2C.start(%{})
     display
   end
 
