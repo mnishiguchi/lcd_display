@@ -1,14 +1,21 @@
 defmodule LcdDisplay.MixProject do
   use Mix.Project
 
+  @version "0.0.1"
+
   def project do
     [
       app: :lcd_display,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.11",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      name: "LcdDisplay",
+      description:
+        "LcdDisplay allows you to control an Liquid-crystal display (LCD) like Hitachi HD44780.",
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      docs: docs(),
+      package: package()
     ]
   end
 
@@ -27,12 +34,27 @@ defmodule LcdDisplay.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:circuits_gpio, "~> 0.4"},
       {:circuits_i2c, "~> 0.1"},
       {:mox, "~> 1.0.0", only: :test},
-      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.14", only: :dev, runtime: false}
     ]
+  end
+
+  defp docs do
+    [
+      main: "LcdDisplay",
+      source_ref: "v#{@version}",
+      source_url: "https://github.com/mnishiguchi/lcd_display"
+    ]
+  end
+
+  defp package do
+    %{
+      licenses: ["MIT"],
+      maintainers: ["Masatoshi Nishiguchi"],
+      links: %{"GitHub" => "https://github.com/mnishiguchi/lcd_display"}
+    }
   end
 end
