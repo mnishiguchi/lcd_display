@@ -1,3 +1,0 @@
-[submodule "examples/nerves_hello_lcd"]
-	path = examples/nerves_hello_lcd
-	url = git@github.com:mnishiguchi/nerves_hello_lcd.git
