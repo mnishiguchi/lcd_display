@@ -35,3 +35,7 @@ alias LcdDisplay.HD44780
 {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
 {:ok, display} = HD44780.I2C.execute(display, :clear)
 ```
+
+## Thanks
+
+- [`ExLcd`](https://github.com/cthree/ex_lcd) for inspiration
