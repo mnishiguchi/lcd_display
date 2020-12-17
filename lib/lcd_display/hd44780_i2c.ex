@@ -3,13 +3,22 @@ defmodule LcdDisplay.HD44780.I2C do
   Knows how to commuticate with HD44780 type display via I2C.
 
   ## Examples
+      alias LcdDisplay.HD44780
+
+      config = %{
+        name: "display 1",   # the identifier
+        i2c_bus: "i2c-1",    # I2C bus name
+        i2c_address: 0x27,   # 7-bit address
+        rows: 2,             # the number of display rows
+        cols: 16,            # the number of display columns
+        font_size: "5x8"     # "5x10" or "5x8"
+      }
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.I2C.start()
+      {:ok, display} = HD44780.I2C.start(config)
 
       # Run a command and the display state will be updated.
       {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
-
   """
 
   use Bitwise
@@ -78,17 +87,17 @@ defmodule LcdDisplay.HD44780.I2C do
   @impl true
   def stop(display) do
     execute(display, {:display, false})
-    Circuits.I2C.close(display.i2c_device)
+    Circuits.I2C.close(display.i2c_bus)
     :ok
   end
 
   defp initial_state(opts) do
-    i2c_device = opts[:i2c_device] || "i2c-1"
-    {:ok, i2c_ref} = SerialBus.open(i2c_device)
+    i2c_bus = opts[:i2c_bus] || "i2c-1"
+    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
 
     %{
       driver_module: __MODULE__,
-      name: opts[:name] || i2c_device,
+      name: opts[:name] || i2c_bus,
       i2c_ref: i2c_ref,
       i2c_address: opts[:i2c_address] || @default_i2c_address,
       rows: opts[:rows] || @default_rows,

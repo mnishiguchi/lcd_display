@@ -95,7 +95,7 @@ defmodule LcdDisplay.HD44780.I2CTest do
   defp setup_i2c_mock() do
     # https://hexdocs.pm/mox/Mox.html#stub/3
     LcdDisplay.MockI2C
-    |> stub(:open, fn _i2c_device -> {:ok, Kernel.make_ref()} end)
+    |> stub(:open, fn _i2c_bus -> {:ok, Kernel.make_ref()} end)
     |> stub(:write, fn _ref, _address, _data -> :ok end)
   end
 end

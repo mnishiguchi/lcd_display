@@ -4,6 +4,8 @@ defmodule LcdDisplay.HD44780.GPIO do
   supports the 4-bit mode only.
 
   ## Examples
+      alias LcdDisplay.HD44780
+
       config = %{
         name: "display 1", # the identifier
         rs: 1,             # the GPIO pin for RS
@@ -17,7 +19,11 @@ defmodule LcdDisplay.HD44780.GPIO do
         font_size: "5x8"   # "5x10" or "5x8"
       }
 
+      # Start the LCD driver and get the initial display state.
       HD44780.GPIO.start(config)
+
+      # Run a command and the display state will be updated.
+      {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
   """
 
   use Bitwise

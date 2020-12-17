@@ -45,7 +45,7 @@ defmodule LcdDisplay.I2C do
 
   @behaviour LcdDisplay.CommunicationBus.I2C
 
-  def open(i2c_device), do: i2c_module().open(i2c_device)
+  def open(i2c_bus), do: i2c_module().open(i2c_bus)
 
   def write(i2c_ref, i2c_address, data), do: i2c_module().write(i2c_ref, i2c_address, data)
 

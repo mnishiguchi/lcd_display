@@ -1,7 +1,8 @@
 defmodule LcdDisplay.MixProject do
   use Mix.Project
 
-  @version "0.0.1"
+  @version "0.0.2"
+  @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
     [
@@ -11,8 +12,7 @@ defmodule LcdDisplay.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       name: "LcdDisplay",
-      description:
-        "LcdDisplay allows you to control an Liquid-crystal display (LCD) like Hitachi HD44780.",
+      description: "Control an Liquid-crystal display (LCD) like Hitachi HD44780",
       deps: deps(),
       docs: docs(),
       package: package()
@@ -43,7 +43,7 @@ defmodule LcdDisplay.MixProject do
     [
       main: "LcdDisplay",
       source_ref: "v#{@version}",
-      source_url: "https://github.com/mnishiguchi/lcd_display"
+      source_url: @source_url
     ]
   end
 
@@ -51,7 +51,7 @@ defmodule LcdDisplay.MixProject do
     %{
       licenses: ["MIT"],
       maintainers: ["Masatoshi Nishiguchi"],
-      links: %{"GitHub" => "https://github.com/mnishiguchi/lcd_display"}
+      links: %{"GitHub" => @source_url}
     }
   end
 end
