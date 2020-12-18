@@ -2,6 +2,7 @@
 
 [![Hex.pm](https://img.shields.io/hexpm/v/lcd_display.svg)](https://hex.pm/packages/lcd_display)
 [![API docs](https://img.shields.io/hexpm/v/lcd_display.svg?label=hexdocs)](https://hexdocs.pm/lcd_display/LcdDisplay.html)
+![CI](https://github.com/mnishiguchi/lcd_display/workflows/CI/badge.svg)
 
 `LcdDisplay` is a simple [Elixir](https://elixir-lang.org/) library that allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller).
 
