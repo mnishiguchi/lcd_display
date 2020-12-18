@@ -5,9 +5,10 @@ The example demonstrates printing `"Hello world"` on an LCD display using the [L
 
 ![nerves_hello_lcd_20201213_185620](https://user-images.githubusercontent.com/7563926/102028171-ba8a6780-3d76-11eb-94f4-f82272fc3063.gif)
 
-## Set up hardware
+## Prepare hardware
 
-- A target board (Raspberry Pi etc)
+- A host machine (e.g. your laptop)
+- A target board (e.g. Raspberry Pi)
 - SD card
 - [LCD display (16x2)](https://www.google.com/search?q=16x2+LCD+display&tbm=isch)
 - [I2C interface module](https://www.google.com/search?q=16x2+LCD+display+I2C+interface)
@@ -77,7 +78,7 @@ Power your target board on.
 Check the connection by pinging.
 
 ```
-$ ping -c 1 nerves.local
+$ ping nerves.local
 ```
 
 SSH into your target board, then interactive Elixir shell will start.

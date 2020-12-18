@@ -6,7 +6,7 @@
 
 `LcdDisplay` is a simple [Elixir](https://elixir-lang.org/) library that allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller).
 
-[See the documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) for more information.
+See [documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) and [example apps](https://github.com/mnishiguchi/lcd_display/tree/main/examples) for more information.
 
 ## Installation
 
@@ -15,7 +15,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "~> 0.0.1"}
+    {:lcd_display, "~> 0.0.2"}
   ]
 end
 ```
