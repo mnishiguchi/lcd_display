@@ -25,7 +25,7 @@ defmodule LcdDisplay.HD44780.I2CTest do
     assert %{
              driver_module: LcdDisplay.HD44780.I2C,
              i2c_address: 0x27,
-             name: "i2c-1",
+             display_name: "i2c-1",
              i2c_ref: i2c_ref,
              rows: 2,
              cols: 16,
@@ -38,13 +38,14 @@ defmodule LcdDisplay.HD44780.I2CTest do
   end
 
   test "start with some options" do
-    opts = %{i2c_address: 0x3F, name: "i2c-2", rows: 4, cols: 20}
-    assert {:ok, %{i2c_address: 0x3F, name: "i2c-2", rows: 4, cols: 20}} = HD44780.I2C.start(opts)
+    opts = %{i2c_address: 0x3F, display_name: "Display 1", rows: 4, cols: 20}
+    {:ok, display} = HD44780.I2C.start(opts)
+    assert %{i2c_address: 0x3F, display_name: "Display 1", rows: 4, cols: 20} = display
   end
 
   describe "commands" do
     setup do
-      %{display: default_display()}
+      with {:ok, display} <- HD44780.I2C.start(%{}), do: %{display: display}
     end
 
     test "execute valid commands", %{display: d} do
@@ -85,11 +86,6 @@ defmodule LcdDisplay.HD44780.I2CTest do
       assert {:ok, %{backlight: false}} = HD44780.I2C.execute(d, {:backlight, false})
       assert {:ok, %{backlight: true}} = HD44780.I2C.execute(d, {:backlight, true})
     end
-  end
-
-  defp default_display do
-    {:ok, display} = HD44780.I2C.start(%{})
-    display
   end
 
   defp setup_i2c_mock() do

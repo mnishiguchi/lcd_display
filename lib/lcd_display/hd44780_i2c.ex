@@ -6,12 +6,12 @@ defmodule LcdDisplay.HD44780.I2C do
       alias LcdDisplay.HD44780
 
       config = %{
-        name: "display 1",   # the identifier
-        i2c_bus: "i2c-1",    # I2C bus name
-        i2c_address: 0x27,   # 7-bit address
-        rows: 2,             # the number of display rows
-        cols: 16,            # the number of display columns
-        font_size: "5x8"     # "5x10" or "5x8"
+        display_name: "display 1", # the identifier
+        i2c_bus: "i2c-1",          # I2C bus name
+        i2c_address: 0x27,         # 7-bit address
+        rows: 2,                   # the number of display rows
+        cols: 16,                  # the number of display columns
+        font_size: "5x8"           # "5x10" or "5x8"
       }
 
       # Start the LCD driver and get the initial display state.
@@ -98,7 +98,7 @@ defmodule LcdDisplay.HD44780.I2C do
 
     %{
       driver_module: __MODULE__,
-      name: opts[:name] || i2c_bus,
+      display_name: opts[:display_name] || i2c_bus,
       i2c_ref: i2c_ref,
       i2c_address: opts[:i2c_address] || @default_i2c_address,
       rows: opts[:rows] || @default_rows,

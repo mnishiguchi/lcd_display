@@ -21,41 +21,47 @@ defmodule LcdDisplay.HD44780.GPIOTest do
   end
 
   test "start display" do
+    {:ok, display} = HD44780.GPIO.start(default_config())
+
     assert %{
              driver_module: LcdDisplay.HD44780.GPIO,
-             name: "display 1",
+             display_name: "display 1",
              font_size: "5x8",
              rows: 2,
              cols: 16,
-             rs: 1,
-             rs_ref: rs_ref,
-             rw: 2,
-             rw_ref: rw_ref,
-             en: 3,
-             en_ref: en_ref,
-             d4: 7,
-             d4_ref: d4_ref,
-             d5: 8,
-             d5_ref: d5_ref,
-             d6: 9,
-             d6_ref: d6_ref,
-             d7: 10,
-             d7_ref: d7_ref,
+             pin_rs: 1,
+             pin_rw: 2,
+             pin_en: 3,
+             pin_d4: 7,
+             pin_d5: 8,
+             pin_d6: 9,
+             pin_d7: 10,
+             pin_led_5v: 12,
+             ref_rs: ref_rs,
+             ref_rw: ref_rw,
+             ref_en: ref_en,
+             ref_d4: ref_d4,
+             ref_d5: ref_d5,
+             ref_d6: ref_d6,
+             ref_d7: ref_d7,
+             ref_led_5v: ref_led_5v,
              entry_mode: 6,
              display_control: 12
-           } = start_display()
+           } = display
 
-    assert is_reference(rs_ref)
-    assert is_reference(en_ref)
-    assert is_reference(d4_ref)
-    assert is_reference(d5_ref)
-    assert is_reference(d6_ref)
-    assert is_reference(d7_ref)
+    assert is_reference(ref_rs)
+    assert is_reference(ref_rw)
+    assert is_reference(ref_en)
+    assert is_reference(ref_d4)
+    assert is_reference(ref_d5)
+    assert is_reference(ref_d6)
+    assert is_reference(ref_d7)
+    assert is_reference(ref_led_5v)
   end
 
   describe "commands" do
     setup do
-      %{display: start_display()}
+      with {:ok, display} <- HD44780.GPIO.start(default_config()), do: %{display: display}
     end
 
     test "execute valid commands", %{display: d} do
@@ -74,6 +80,8 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:left, 2})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:right, 2})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:char, 2, [1, 1, 1, 1, 1, 1, 1, 1]})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:backlight, false})
+      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:backlight, true})
     end
 
     test "execute unsupported commands", %{display: d} do
@@ -91,30 +99,23 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       assert {:ok, %{display_control: 8}} = HD44780.GPIO.execute(d, {:display, false})
       assert {:ok, %{display_control: 12}} = HD44780.GPIO.execute(d, {:display, true})
     end
-
-    test "change backlight", %{display: d} do
-      assert {:ok, %{backlight: false}} = HD44780.GPIO.execute(d, {:backlight, false})
-      assert {:ok, %{backlight: true}} = HD44780.GPIO.execute(d, {:backlight, true})
-    end
   end
 
-  defp start_display do
-    {:ok, display} =
-      HD44780.GPIO.start(%{
-        name: "display 1",
-        rows: 2,
-        cols: 16,
-        font_size: "5x8",
-        rs: 1,
-        rw: 2,
-        en: 3,
-        d4: 7,
-        d5: 8,
-        d6: 9,
-        d7: 10
-      })
-
-    display
+  defp default_config do
+    %{
+      display_name: "display 1",
+      rows: 2,
+      cols: 16,
+      font_size: "5x8",
+      pin_rs: 1,
+      pin_rw: 2,
+      pin_en: 3,
+      pin_d4: 7,
+      pin_d5: 8,
+      pin_d6: 9,
+      pin_d7: 10,
+      pin_led_5v: 12,
+    }
   end
 
   defp setup_gpio_mock() do

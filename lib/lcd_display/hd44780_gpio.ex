@@ -7,14 +7,15 @@ defmodule LcdDisplay.HD44780.GPIO do
       alias LcdDisplay.HD44780
 
       config = %{
-        name: "display 1", # the identifier
-        rs: 2,             # the GPIO pin for RS
-        rw: 3,             # the GPIO pin for RW
-        en: 4,             # the GPIO pin for EN
-        d4: 23,            # the GPIO pin for D4
-        d5: 24,            # the GPIO pin for D5
-        d6: 25,            # the GPIO pin for D6
-        d7: 26,            # the GPIO pin for D7
+        display_name: "display 1",
+        pin_rs: 2,
+        pin_rw: 3,
+        pin_en: 4,
+        pin_d4: 23,
+        pin_d5: 24,
+        pin_d6: 25,
+        pin_d7: 26,
+        pin_led_5v: 12,
       }
 
       # Start the LCD driver and get the initial display state.
@@ -62,13 +63,16 @@ defmodule LcdDisplay.HD44780.GPIO do
   @shift_display 0x08
   @shift_right 0x04
 
-  # flags for backlight control
-  @backlight_on 0x08
-
-  @pins_4bit [:rs, :rw, :en, :d4, :d5, :d6, :d7]
-
-  @required_config_keys [:name, :rs, :rw, :en, :d4, :d5, :d6, :d7]
-  @optional_config_keys [:rows, :cols, :font_size]
+  @required_config_keys [
+    :display_name,
+    :pin_rs,
+    :pin_en,
+    :pin_d4,
+    :pin_d5,
+    :pin_d6,
+    :pin_d7
+  ]
+  @optional_config_keys [:rows, :cols, :font_size, :pin_rw, :pin_led_5v]
 
   @default_rows 2
   @default_cols 16
@@ -84,6 +88,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok,
      opts
      |> initial_state()
+     |> set_backlight(true)
      |> initialize_display(
        function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines
      )}
@@ -112,10 +117,9 @@ defmodule LcdDisplay.HD44780.GPIO do
 
       # Initial values for features that we can change later.
       entry_mode: @cmd_entry_mode_set ||| @entry_left,
-      display_control: @cmd_display_control ||| @display_on,
-      backlight: true
+      display_control: @cmd_display_control ||| @display_on
     })
-    |> open_gpio_pins(@pins_4bit)
+    |> open_gpio_pins()
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
@@ -141,16 +145,18 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   # Setup GPIO output pins, merge the refs to the config map.
-  defp open_gpio_pins(config, pins) do
-    config
-    |> Map.take(pins)
-    |> Enum.map(fn {pin_name, pin_number} ->
-      with {:ok, gpio_ref} <- ParallelBus.open(pin_number, :output) do
-        {String.to_atom("#{pin_name}_ref"), gpio_ref}
-      end
-    end)
-    |> Map.new()
-    |> Map.merge(config)
+  defp open_gpio_pins(config) do
+    refs =
+      config
+      |> Enum.filter(fn {key, _} -> String.starts_with?("#{key}", "pin_") end)
+      |> Enum.map(fn {pin_name, pin_number} ->
+        {:ok, gpio_ref} = ParallelBus.open(pin_number, :output)
+        key = String.replace("#{pin_name}", "pin", "ref") |> String.to_atom()
+        {key, gpio_ref}
+      end)
+      |> Enum.into(%{})
+
+    Map.merge(config, refs)
   end
 
   @doc """
@@ -289,8 +295,8 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp set_backlight(display, flag) when is_boolean(flag) do
-    # Set backlight and write 0 (nothing) to trigger it.
-    %{display | backlight: flag} |> write_data(0)
+    ParallelBus.write(display.ref_led_5v, if(flag, do: 1, else: 0))
+    display
   end
 
   defp disable_entry_mode_flag(display, flag) do
@@ -330,20 +336,20 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp write_four_bits(display, bits) when is_integer(bits) do
-    :ok = ParallelBus.write(display.d4_ref, bits &&& 0x01)
-    :ok = ParallelBus.write(display.d5_ref, bits >>> 1 &&& 0x01)
-    :ok = ParallelBus.write(display.d6_ref, bits >>> 2 &&& 0x01)
-    :ok = ParallelBus.write(display.d7_ref, bits >>> 3 &&& 0x01)
+    :ok = ParallelBus.write(display.ref_d4, bits &&& 0x01)
+    :ok = ParallelBus.write(display.ref_d5, bits >>> 1 &&& 0x01)
+    :ok = ParallelBus.write(display.ref_d6, bits >>> 2 &&& 0x01)
+    :ok = ParallelBus.write(display.ref_d7, bits >>> 3 &&& 0x01)
     pulse_enable(display)
   end
 
   defp register_select(display, flag) when flag in 0..1 do
-    :ok = ParallelBus.write(display.rs_ref, flag)
+    :ok = ParallelBus.write(display.ref_rs, flag)
     display
   end
 
   defp enable(display, flag) when flag in 0..1 do
-    :ok = ParallelBus.write(display.en_ref, flag)
+    :ok = ParallelBus.write(display.ref_en, flag)
     display
   end
 
