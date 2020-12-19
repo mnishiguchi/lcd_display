@@ -114,7 +114,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       pin_d5: 8,
       pin_d6: 9,
       pin_d7: 10,
-      pin_led_5v: 12,
+      pin_led_5v: 12
     }
   end
 

@@ -6,7 +6,7 @@ defmodule NervesHelloLcd.DisplayController do
   use GenServer
   require Logger
 
-  def child_spec(%{name: display_name} = initial_display) do
+  def child_spec(%{display_name: display_name} = initial_display) do
     %{
       id: {__MODULE__, display_name},
       start: {__MODULE__, :start_link, [initial_display]}
@@ -14,11 +14,11 @@ defmodule NervesHelloLcd.DisplayController do
   end
 
   # Used as a unique process name.
-  def via_tuple({driver_module, _name} = key) when is_atom(driver_module) do
+  def via_tuple({driver_module, _display_name} = key) when is_atom(driver_module) do
     NervesHelloLcd.ProcessRegistry.via_tuple({__MODULE__, key})
   end
 
-  def whereis({driver_module, _name} = key) when is_atom(driver_module) do
+  def whereis({driver_module, _display_name} = key) when is_atom(driver_module) do
     case NervesHelloLcd.ProcessRegistry.whereis_name({__MODULE__, key}) do
       :undefined -> nil
       pid -> pid
@@ -30,11 +30,11 @@ defmodule NervesHelloLcd.DisplayController do
   a process with a composite key of driver module and display name.
 
   ## Examples
-    {:ok, display} = LcdDisplay.HD44780.I2C.start(name: "display 2")
+    {:ok, display} = LcdDisplay.HD44780.I2C.start(display_name: "display 2")
     {:ok, pid} = DisplayController.start_link(display)
     DisplayController.execute(pid, {:print, "Hello"})
   """
-  def start_link(%{driver_module: driver_module, name: display_name} = initial_display) do
+  def start_link(%{driver_module: driver_module, display_name: display_name} = initial_display) do
     GenServer.start_link(__MODULE__, initial_display,
       name: via_tuple({driver_module, display_name})
     )
