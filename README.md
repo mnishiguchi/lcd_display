@@ -40,3 +40,7 @@ alias LcdDisplay.HD44780
 ## Thanks
 
 - [`ExLCD`](https://github.com/cthree/ex_lcd) for inspiration
+
+## Links
+
+- [Hitachi HD44780](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf) datasheet
