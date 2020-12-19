@@ -76,7 +76,8 @@ defmodule LcdDisplay.HD44780.I2C do
     font_size = if opts[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
 
     {:ok,
-     initial_state(opts)
+     opts
+     |> initial_state()
      |> expander_write(@backlight_on)
      |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
   end
@@ -252,7 +253,6 @@ defmodule LcdDisplay.HD44780.I2C do
   ## Low level data pushing commands
   ##
 
-  # DDRAM is organized as two 40 byte rows. In a 2x display the first row
   # Determines the starting DDRAM address of each display row and returns a map
   # for up to 4 rows. Rows are not contiguous in memory.
   defp row_offsets(cols) when is_integer(cols) do

@@ -8,22 +8,20 @@ defmodule LcdDisplay.HD44780.GPIO do
 
       config = %{
         name: "display 1", # the identifier
-        rs: 1,             # the GPIO pin for RS
-        en: 2,             # the GPIO pin for EN
-        d4: 7,             # the GPIO pin for D4
-        d5: 8,             # the GPIO pin for D5
-        d6: 9,             # the GPIO pin for D6
-        d7: 10,            # the GPIO pin for D7
-        rows: 2,           # the number of display rows
-        cols: 16,          # the number of display columns
-        font_size: "5x8"   # "5x10" or "5x8"
+        rs: 2,             # the GPIO pin for RS
+        rw: 3,             # the GPIO pin for RW
+        en: 4,             # the GPIO pin for EN
+        d4: 23,            # the GPIO pin for D4
+        d5: 24,            # the GPIO pin for D5
+        d6: 25,            # the GPIO pin for D6
+        d7: 26,            # the GPIO pin for D7
       }
 
       # Start the LCD driver and get the initial display state.
-      HD44780.GPIO.start(config)
+      {:ok, display} = HD44780.GPIO.start(config)
 
       # Run a command and the display state will be updated.
-      {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
+      {:ok, display} = HD44780.GPIO.execute(display, {:print, "Hello world"})
   """
 
   use Bitwise
@@ -35,6 +33,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   @behaviour LcdDisplay.DisplayDriver
 
   # flags for function set
+  @mode_4bit 0x01
   @font_size_5x8 0x00
   @font_size_5x10 0x04
   @number_of_lines_1 0x00
@@ -66,10 +65,13 @@ defmodule LcdDisplay.HD44780.GPIO do
   # flags for backlight control
   @backlight_on 0x08
 
-  @pins_4bit [:rs, :en, :d4, :d5, :d6, :d7]
+  @pins_4bit [:rs, :rw, :en, :d4, :d5, :d6, :d7]
 
-  @required_config_keys [:name, :rs, :en, :d4, :d5, :d6, :d7, :rows, :cols]
-  @optional_config_keys [:font_size]
+  @required_config_keys [:name, :rs, :rw, :en, :d4, :d5, :d6, :d7]
+  @optional_config_keys [:rows, :cols, :font_size]
+
+  @default_rows 2
+  @default_cols 16
 
   @doc """
   Initializes the LCD driver and returns the initial display state.
@@ -80,10 +82,11 @@ defmodule LcdDisplay.HD44780.GPIO do
     font_size = if opts[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
 
     {:ok,
-     initial_state(opts)
-     |> register_select(0)
-     |> enable(0)
-     |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
+     opts
+     |> initial_state()
+     |> initialize_display(
+       function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines
+     )}
   end
 
   @doc """
@@ -96,20 +99,20 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp initial_state(opts) do
-    # Ensure that the datatype is map and remove garbage keys.
-    opts = Map.take(opts, @required_config_keys ++ @optional_config_keys)
-
     # Raise an error when required key is missing.
     Enum.each(@required_config_keys, &Map.fetch!(opts, &1))
 
-    Map.merge(opts, %{
+    opts
+    # Ensure that the datatype is map and remove garbage keys.
+    |> Map.take(@required_config_keys ++ @optional_config_keys)
+    |> Map.merge(%{
       driver_module: __MODULE__,
-      rows: opts[:rows] || 2,
-      cols: opts[:cols] || 16,
+      rows: opts[:rows] || @default_rows,
+      cols: opts[:cols] || @default_cols,
+
       # Initial values for features that we can change later.
-      # They will be updated when the "command" function is called.
-      display_control: @cmd_display_control,
-      entry_mode: @cmd_entry_mode_set,
+      entry_mode: @cmd_entry_mode_set ||| @entry_left,
+      display_control: @cmd_display_control ||| @display_on,
       backlight: true
     })
     |> open_gpio_pins(@pins_4bit)
@@ -310,18 +313,15 @@ defmodule LcdDisplay.HD44780.GPIO do
     %{display | display_control: display_control} |> write_feature(:display_control)
   end
 
-  # Write a feature register to the controller and return the state.
+  # Write a feature based on the display state.
   defp write_feature(display, feature_key) when is_atom(feature_key) do
-    display |> write_byte(Map.fetch!(display, feature_key))
+    display |> write_instruction(Map.fetch!(display, feature_key))
   end
 
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
-  defp write_byte(%{backlight: backlight} = display, byte, mode \\ 0)
-       when is_integer(byte) and mode in 0..1 do
-    byte = if(backlight, do: byte ||| @backlight_on, else: byte)
-
+  defp write_byte(display, byte, mode) when is_integer(byte) and mode in 0..1 do
     display
     |> register_select(mode)
     |> delay(1)
@@ -348,7 +348,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp pulse_enable(display) do
-    display |> enable(0) |> enable(1) |> enable(0)
+    display |> enable(1) |> enable(0)
   end
 
   defp delay(display, milliseconds) do

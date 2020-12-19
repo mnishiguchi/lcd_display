@@ -29,7 +29,9 @@ defmodule LcdDisplay.HD44780.GPIOTest do
              cols: 16,
              rs: 1,
              rs_ref: rs_ref,
-             en: 2,
+             rw: 2,
+             rw_ref: rw_ref,
+             en: 3,
              en_ref: en_ref,
              d4: 7,
              d4_ref: d4_ref,
@@ -39,8 +41,8 @@ defmodule LcdDisplay.HD44780.GPIOTest do
              d6_ref: d6_ref,
              d7: 10,
              d7_ref: d7_ref,
-             entry_mode: 4,
-             display_control: 8
+             entry_mode: 6,
+             display_control: 12
            } = start_display()
 
     assert is_reference(rs_ref)
@@ -104,7 +106,8 @@ defmodule LcdDisplay.HD44780.GPIOTest do
         cols: 16,
         font_size: "5x8",
         rs: 1,
-        en: 2,
+        rw: 2,
+        en: 3,
         d4: 7,
         d5: 8,
         d6: 9,

@@ -26,10 +26,10 @@ defmodule NervesHelloLcd.DisplaySupervisor do
       name: "display 1"
     )
   """
-  def display_controller(driver_module, config) when is_atom(driver_module) and is_list(config) do
-    display_name = Keyword.fetch!(config, :name)
+  def display_controller(driver_module, config) when is_atom(driver_module) do
+    config = Enum.into(config, %{})
 
-    case DisplayController.whereis({driver_module, display_name}) do
+    case DisplayController.whereis({driver_module, config.name}) do
       nil -> start_child(driver_module, config)
       pid -> pid
     end
