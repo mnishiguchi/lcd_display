@@ -327,19 +327,23 @@ defmodule LcdDisplay.HD44780.GPIO do
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
-  defp write_byte(display, byte, mode) when is_integer(byte) and mode in 0..1 do
+  defp write_byte(display, byte, mode)
+       when is_integer(byte) and byte in 0..255 and mode in 0..1 do
+    <<first::4, second::4>> = <<byte>>
+
     display
     |> register_select(mode)
     |> delay(1)
-    |> write_four_bits(byte >>> 4)
-    |> write_four_bits(byte)
+    |> write_four_bits(first)
+    |> write_four_bits(second)
   end
 
-  defp write_four_bits(display, bits) when is_integer(bits) do
-    :ok = ParallelBus.write(display.ref_d4, bits &&& 0x01)
-    :ok = ParallelBus.write(display.ref_d5, bits >>> 1 &&& 0x01)
-    :ok = ParallelBus.write(display.ref_d6, bits >>> 2 &&& 0x01)
-    :ok = ParallelBus.write(display.ref_d7, bits >>> 3 &&& 0x01)
+  defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..15 do
+    <<bit1::1, bit2::1, bit3::1, bit4::1>> = <<bits::4>>
+    :ok = ParallelBus.write(display.ref_d4, bit4)
+    :ok = ParallelBus.write(display.ref_d5, bit3)
+    :ok = ParallelBus.write(display.ref_d6, bit2)
+    :ok = ParallelBus.write(display.ref_d7, bit1)
     pulse_enable(display)
   end
 
