@@ -23,6 +23,25 @@ defmodule LcdDisplay.DisplayDriver do
 
   @typedoc """
   Type that represents a supported display command.
+
+  | Supported Command      | Description                                                   |
+  | ---------------------- | ------------------------------------------------------------- |
+  | `:clear`               | Clear the display.                                            |
+  | `:home`                | Move the cursor home.                                         |
+  | `:print`               | Print a text at the current cursor.                           |
+  | `:write`               | write a character (byte) at the current cursor.               |
+  | `:set_cursor`          | Move the cursor to the specified position (column and row).   |
+  | `:cursor`              | Switch on/off the underline cursor.                           |
+  | `:display`             | Switch on/off the display.                                    |
+  | `:blink`               | Switch on/off the block cursor.                               |
+  | `:autoscroll`          | Automatically scroll the display when a charactor is written. |
+  | `:backlight`           | Switch on/off the backlight.                                  |
+  | `:entry_right_to_left` | Text is printed from right to left.                           |
+  | `:entry_left_to_right` | Text is printed from left to right.                           |
+  | `:scroll`              | Scroll left/right the display.                                |
+  | `:left`                | Move the cursor left.                                         |
+  | `:right`               | Move the cursor right.                                        |
+  | `:char`                | Program custom character to CGRAM.                            |
   """
   @type command ::
           :clear
@@ -34,9 +53,9 @@ defmodule LcdDisplay.DisplayDriver do
           | {:blink, boolean()}
           | {:display, boolean()}
           | {:autoscroll, boolean()}
+          | {:backlight, boolean()}
           | :entry_right_to_left
           | :entry_left_to_right
-          | {:backlight, boolean()}
           | {:scroll, integer()}
           | {:left, integer()}
           | {:right, integer()}

@@ -47,7 +47,7 @@ defmodule LcdDisplay.HD44780.I2C do
 
   # flags for display entry mode
   @entry_left 0x02
-  @entry_increment 0x01
+  @autoscroll 0x01
 
   # flags for display on/off control
   @display_on 0x04
@@ -188,11 +188,11 @@ defmodule LcdDisplay.HD44780.I2C do
   end
 
   def execute(display, {:autoscroll, false}) do
-    {:ok, disable_entry_mode_flag(display, @entry_increment)}
+    {:ok, disable_entry_mode_flag(display, @autoscroll)}
   end
 
   def execute(display, {:autoscroll, true}) do
-    {:ok, enable_entry_mode_flag(display, @entry_increment)}
+    {:ok, enable_entry_mode_flag(display, @autoscroll)}
   end
 
   def execute(display, :entry_right_to_left) do
