@@ -1,7 +1,8 @@
 defmodule LcdDisplay.HD44780.GPIO do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display via GPIO pins. Currently
-  supports the 4-bit mode only.
+  Knows how to commuticate with HD44780 type display via GPIO pins.
+  Supports the 4-bit mode only.
+  You can turn on/off only one backlight LED.
 
   ## Examples
       alias LcdDisplay.HD44780

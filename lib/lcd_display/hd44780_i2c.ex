@@ -1,6 +1,7 @@
 defmodule LcdDisplay.HD44780.I2C do
   @moduledoc """
   Knows how to commuticate with HD44780 type display via I2C.
+  You can turn on/off only one backlight LED.
 
   ## Examples
       alias LcdDisplay.HD44780
