@@ -3,13 +3,6 @@ defmodule NervesHelloLcd do
 
   @moduledoc """
   Some test programs for quick check.
-  ## Examples
-      test_fn = fn ->
-        Process.sleep(5000)
-        Task.start_link(fn -> NervesHelloLcd.hello_gpio() end)
-        Task.start_link(fn -> NervesHelloLcd.hello_i2c() end)
-      end
-      test_fn.()
   """
 
   def hello_i2c(opts \\ %{}) do

@@ -12,9 +12,6 @@ defmodule NervesHelloLcd.Application do
 
     children =
       [
-        # Children for all targets
-        # Starts a worker by calling: NervesHelloLcd.Worker.start_link(arg)
-        # {NervesHelloLcd.Worker, arg},
         {NervesHelloLcd.ProcessRegistry, nil},
         {NervesHelloLcd.DisplaySupervisor, nil},
       ] ++ children(target())

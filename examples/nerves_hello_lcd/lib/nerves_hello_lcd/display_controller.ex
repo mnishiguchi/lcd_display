@@ -26,13 +26,8 @@ defmodule NervesHelloLcd.DisplayController do
   end
 
   @doc """
-  Accepts a map that a display driver returns, starts a process, and registers
-  a process with a composite key of driver module and display name.
-
-  ## Examples
-    {:ok, display} = LcdDisplay.HD44780.I2C.start(display_name: "display 2")
-    {:ok, pid} = DisplayController.start_link(display)
-    DisplayController.execute(pid, {:print, "Hello"})
+  Starts a display driver process and registers the process with a composite key
+  of driver module and display name.
   """
   def start_link(%{driver_module: driver_module, display_name: display_name} = initial_display) do
     GenServer.start_link(__MODULE__, initial_display,
@@ -41,13 +36,12 @@ defmodule NervesHelloLcd.DisplayController do
   end
 
   @doc """
-  Accepts a map that a display driver returns, and delegates the operation to
-  the display driver.
+  Delegates the specified operation to the display driver.
 
   ## Examples
     DisplayController.execute(pid, {:print, "Hello"})
   """
-  def execute(pid, op), do: GenServer.call(pid, op)
+  def execute(pid, command), do: GenServer.call(pid, command)
 
   @impl true
   def init(initial_display), do: {:ok, initial_display}
