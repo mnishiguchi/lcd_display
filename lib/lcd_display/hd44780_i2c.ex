@@ -116,15 +116,15 @@ defmodule LcdDisplay.HD44780.I2C do
   defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
-    |> write_four_bits(0x03)
+    |> write_four_bits(0x03 <<< 4)
     |> delay(5)
-    |> write_four_bits(0x03)
+    |> write_four_bits(0x03 <<< 4)
     |> delay(5)
-    |> write_four_bits(0x03)
+    |> write_four_bits(0x03 <<< 4)
     |> delay(1)
 
     # Function set (4-bit mode; Interface is 8 bits long)
-    |> write_four_bits(0x02)
+    |> write_four_bits(0x02 <<< 4)
 
     # Function set (4-bit mode; Interface is 4 bits long)
     # The number of display lines and character font cannot be changed after this point.
@@ -303,15 +303,13 @@ defmodule LcdDisplay.HD44780.I2C do
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
   defp write_byte(display, byte, mode) when is_integer(byte) and mode in 0..1 do
-    <<first::4, second::4>> = <<byte>>
-
     display
-    |> write_four_bits(first ||| mode)
-    |> write_four_bits(second ||| mode)
+    |> write_four_bits((byte &&& 0xF0) ||| mode)
+    |> write_four_bits((byte <<< 4 &&& 0xF0) ||| mode)
   end
 
   # Write 4 bits to the device
-  defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..15 do
+  defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..255 do
     display |> expander_write(bits) |> pulse_enable(bits)
   end
 
