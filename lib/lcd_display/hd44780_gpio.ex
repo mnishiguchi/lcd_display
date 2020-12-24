@@ -27,9 +27,8 @@ defmodule LcdDisplay.HD44780.GPIO do
   """
 
   use Bitwise
-
   require Logger
-
+  import LcdDisplay.Util
   alias LcdDisplay.GPIO, as: ParallelBus
 
   @behaviour LcdDisplay.DisplayDriver
@@ -280,19 +279,12 @@ defmodule LcdDisplay.HD44780.GPIO do
   ## Low level data pushing commands
   ##
 
-  # Determines the starting DDRAM address of each display row and returns a map
-  # for up to 4 rows. Rows are not contiguous in memory.
-  defp row_offsets(cols) do
-    %{0 => 0x00, 1 => 0x40, 2 => 0x00 + cols, 3 => 0x40 + cols}
-  end
-
   # Set the DDRAM address corresponding to the specified cursor position.
-  defp set_cursor(display, cursor_row, cursor_col) when cursor_row > 0 and cursor_col > 0 do
-    %{rows: display_rows, cols: display_cols} = display
-    col = min(cursor_col, display_cols - 1)
-    row = min(cursor_col, display_rows - 1)
-    %{^row => offset} = row_offsets(display_cols)
-    write_instruction(display, @cmd_set_ddram_address ||| col + offset)
+  defp set_cursor(display, cursor_row, cursor_col) when cursor_row >= 0 and cursor_col >= 0 do
+    cursor_position =
+      determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
+
+    write_instruction(display, @cmd_set_ddram_address ||| cursor_position)
   end
 
   defp set_backlight(display, flag) when is_boolean(flag) do
