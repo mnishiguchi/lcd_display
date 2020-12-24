@@ -18,9 +18,10 @@ defmodule LcdDisplay.DisplaySupervisor do
   end
 
   @doc """
-  Finds or create a DisplayController process.
+  Finds or creates a DisplayController process.
 
   ## Examples
+
     pid = DisplaySupervisor.display_controller(
       LcdDisplay.HD44780.I2C,
       %{display_name: "display 1"}
@@ -42,8 +43,7 @@ defmodule LcdDisplay.DisplaySupervisor do
     end
   end
 
-  defp initialize_display(driver_module, config) when is_map(config) do
-    {:ok, display} = apply(driver_module, :start, [config])
-    display
+  defp initialize_display(driver_module, config) when is_atom(driver_module) and is_map(config) do
+    with {:ok, display} <- apply(driver_module, :start, [config]), do: display
   end
 end

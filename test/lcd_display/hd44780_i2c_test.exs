@@ -1,5 +1,6 @@
 defmodule LcdDisplay.HD44780.I2CTest do
   use ExUnit.Case, async: true
+  doctest LcdDisplay.HD44780.I2C
 
   # https://hexdocs.pm/mox/Mox.html
   import Mox
