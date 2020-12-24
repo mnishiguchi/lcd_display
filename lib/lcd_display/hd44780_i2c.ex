@@ -150,12 +150,10 @@ defmodule LcdDisplay.HD44780.I2C do
   # Write a string.
   def execute(display, {:print, string}) when is_binary(string) do
     # Translates a string to a charlist (list of bytes).
-    execute(display, {:write, to_charlist(string)})
-  end
+    string
+    |> to_charlist()
+    |> Enum.each(&write_data(display, &1))
 
-  # Writes a list of integers.
-  def execute(display, {:write, bytes}) when is_list(bytes) do
-    Enum.each(bytes, &write_data(display, &1))
     {:ok, display}
   end
 
@@ -243,7 +241,7 @@ defmodule LcdDisplay.HD44780.I2C do
     {:ok, display}
   end
 
-  def execute(display, _), do: {:unsupported, display}
+  def execute(_display, command), do: {:unsupported, command}
 
   defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 

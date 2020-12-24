@@ -8,7 +8,7 @@ defmodule LcdDisplay.DisplayDriver do
   """
   @type display :: %{
           required(:driver_module) => atom(),
-          required(:name) => String.t(),
+          required(:display_name) => String.t(),
           required(:rows) => integer(),
           required(:cols) => integer(),
           required(:entry_mode) => integer(),
@@ -74,5 +74,5 @@ defmodule LcdDisplay.DisplayDriver do
   @doc """
   Executes the specified command and returns a new display state.
   """
-  @callback execute(display, command) :: {:ok | :error, display}
+  @callback execute(display, command) :: {:ok, display} | {:error, any()}
 end
