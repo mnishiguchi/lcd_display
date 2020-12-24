@@ -10,11 +10,7 @@ defmodule NervesHelloLcd.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: NervesHelloLcd.Supervisor]
 
-    children =
-      [
-        {NervesHelloLcd.ProcessRegistry, nil},
-        {NervesHelloLcd.DisplaySupervisor, nil},
-      ] ++ children(target())
+    children = [] ++ children(target())
 
     {:ok, _pid} = Supervisor.start_link(children, opts)
   end

@@ -1,13 +1,11 @@
 defmodule NervesHelloLcd do
-  alias NervesHelloLcd.{DisplaySupervisor, DisplayController}
-
   @moduledoc """
   Some test programs for quick check.
   """
 
   def hello_i2c(opts \\ %{}) do
     pid =
-      DisplaySupervisor.display_controller(
+      LcdDisplay.start_display(
         LcdDisplay.HD44780.I2C,
         Enum.into(
           opts,
@@ -19,12 +17,12 @@ defmodule NervesHelloLcd do
     backlight_off_on(pid)
     scroll_right_and_left(pid)
 
-    DisplayController.execute(pid, :clear)
+    LcdDisplay.execute(pid, :clear)
   end
 
   def hello_gpio(opts \\ %{}) do
     pid =
-      DisplaySupervisor.display_controller(
+      LcdDisplay.start_display(
         LcdDisplay.HD44780.GPIO,
         Enum.into(
           opts,
@@ -46,37 +44,37 @@ defmodule NervesHelloLcd do
     backlight_off_on(pid)
     scroll_right_and_left(pid)
 
-    DisplayController.execute(pid, :clear)
+    LcdDisplay.execute(pid, :clear)
   end
 
   defp cursor_and_print(pid) do
-    DisplayController.execute(pid, {:cursor, true})
-    DisplayController.execute(pid, {:print, "Hello"})
+    LcdDisplay.execute(pid, {:cursor, true})
+    LcdDisplay.execute(pid, {:print, "Hello"})
     Process.sleep(500)
-    DisplayController.execute(pid, {:right, 1})
-    DisplayController.execute(pid, {:print, "world"})
+    LcdDisplay.execute(pid, {:right, 1})
+    LcdDisplay.execute(pid, {:print, "world"})
     Process.sleep(500)
-    DisplayController.execute(pid, {:cursor, false})
+    LcdDisplay.execute(pid, {:cursor, false})
     Process.sleep(500)
   end
 
   defp backlight_off_on(pid) do
-    DisplayController.execute(pid, {:backlight, false})
+    LcdDisplay.execute(pid, {:backlight, false})
     Process.sleep(500)
-    DisplayController.execute(pid, {:backlight, true})
+    LcdDisplay.execute(pid, {:backlight, true})
     Process.sleep(500)
   end
 
   defp scroll_right_and_left(pid) do
     0..3
     |> Enum.each(fn _ ->
-      DisplayController.execute(pid, {:scroll, 1})
+      LcdDisplay.execute(pid, {:scroll, 1})
       Process.sleep(300)
     end)
 
     0..3
     |> Enum.each(fn _ ->
-      DisplayController.execute(pid, {:scroll, -1})
+      LcdDisplay.execute(pid, {:scroll, -1})
       Process.sleep(300)
     end)
   end

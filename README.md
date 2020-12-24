@@ -15,7 +15,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.9"}
+    {:lcd_display, "0.0.10"}
   ]
 end
 ```
@@ -27,14 +27,16 @@ As an example, if you want to control a Hitachi HD44780 type display through
 display driver.
 
 ```elixir
-alias LcdDisplay.HD44780
+# Start the LCD driver and get a PID.
+pid =
+  LcdDisplay.start_display(
+    LcdDisplay.HD44780.I2C,      # A display driver module
+    %{display_name: "display 1"} # A config map
+  )
 
-# Start the LCD driver and get the initial display state.
-{:ok, display} = HD44780.I2C.start()
-
-# Run a command and the display state will be updated.
-{:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
-{:ok, display} = HD44780.I2C.execute(display, :clear)
+# Run a command.
+LcdDisplay.execute(pid, {:print, "Hello world"})
+LcdDisplay.execute(pid, :clear)
 ```
 
 ## Thanks
@@ -43,4 +45,4 @@ alias LcdDisplay.HD44780
 
 ## Links
 
-- [Hitachi HD44780](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf) datasheet
+- [Hitachi HD44780 datasheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
