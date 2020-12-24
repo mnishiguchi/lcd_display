@@ -19,13 +19,15 @@ defmodule LcdDisplay.DisplaySupervisorTest do
       setup_display_driver_mock("display 1")
 
       pid1 =
-        DisplaySupervisor.display_controller(LcdDisplay.MockDisplayDriver,
-          display_name: "display 1"
+        DisplaySupervisor.display_controller(
+          LcdDisplay.MockDisplayDriver,
+          %{display_name: "display 1"}
         )
 
       pid2 =
-        DisplaySupervisor.display_controller(LcdDisplay.MockDisplayDriver,
-          display_name: "display 1"
+        DisplaySupervisor.display_controller(
+          LcdDisplay.MockDisplayDriver,
+          %{display_name: "display 1"}
         )
 
       assert is_pid(pid1)
@@ -36,15 +38,17 @@ defmodule LcdDisplay.DisplaySupervisorTest do
       setup_display_driver_mock("display 1")
 
       pid1 =
-        DisplaySupervisor.display_controller(LcdDisplay.MockDisplayDriver,
-          display_name: "display 1"
+        DisplaySupervisor.display_controller(
+          LcdDisplay.MockDisplayDriver,
+          %{display_name: "display 1"}
         )
 
       setup_display_driver_mock("display 2")
 
       pid2 =
-        DisplaySupervisor.display_controller(LcdDisplay.MockDisplayDriver,
-          display_name: "display 2"
+        DisplaySupervisor.display_controller(
+          LcdDisplay.MockDisplayDriver,
+          %{display_name: "display 2"}
         )
 
       assert pid1 != pid2

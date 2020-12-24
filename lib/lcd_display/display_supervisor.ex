@@ -32,12 +32,10 @@ defmodule LcdDisplay.DisplaySupervisor do
   ## Examples
     pid = DisplaySupervisor.display_controller(
       LcdDisplay.HD44780.I2C,
-      display_name: "display 1"
+      %{display_name: "display 1"}
     )
   """
-  def display_controller(driver_module, config) when is_atom(driver_module) do
-    config = Enum.into(config, %{})
-
+  def display_controller(driver_module, config) when is_atom(driver_module) and is_map(config) do
     case DisplayController.whereis({driver_module, config.display_name}) do
       nil -> start_child(driver_module, config)
       pid -> pid

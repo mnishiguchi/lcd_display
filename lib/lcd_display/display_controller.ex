@@ -13,12 +13,16 @@ defmodule LcdDisplay.DisplayController do
     }
   end
 
-  # Used as a unique process name.
-  def via_tuple({driver_module, _display_name} = key) when is_atom(driver_module) do
+  defp via_tuple({driver_module, _display_name} = key)
+       when is_tuple(key) and is_atom(driver_module) do
     LcdDisplay.ProcessRegistry.via_tuple({__MODULE__, key})
   end
 
-  def whereis({driver_module, _display_name} = key) when is_atom(driver_module) do
+  @doc """
+  Discovers a process by the composite key of driver module atom and display name.
+  """
+  def whereis({driver_module, _display_name} = key)
+      when is_tuple(key) and is_atom(driver_module) do
     case LcdDisplay.ProcessRegistry.whereis_name({__MODULE__, key}) do
       :undefined -> nil
       pid -> pid
@@ -36,7 +40,7 @@ defmodule LcdDisplay.DisplayController do
   end
 
   @doc """
-  Delegates the specified operation to the display driver.
+  Delegates the specified operation to the display driver, and updates the state as needed.
 
   ## Examples
     DisplayController.execute(pid, {:print, "Hello"})

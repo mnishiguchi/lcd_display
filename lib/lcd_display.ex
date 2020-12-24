@@ -11,13 +11,29 @@ defmodule LcdDisplay do
   [I²C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
   display driver.
 
-      alias LcdDisplay.HD44780
+      alias LcdDisplay.{DisplaySupervisor, DisplayController, HD44780}
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.I2C.start()
+      pid = LcdDisplay.start_display(HD44780.I2C, %{display_name: "Display 1"})
 
-      # Run a command and the display state will be updated.
-      {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
-      {:ok, display} = HD44780.I2C.execute(display, :clear)
+      # Run a command.
+      LcdDisplay.execute(pid, {:print, "Hello world"})
+      LcdDisplay.execute(pid, :clear)
   """
+
+  alias LcdDisplay.{DisplaySupervisor, DisplayController}
+
+  @doc """
+  Finds or starts a supervised display controller process.
+  """
+  def start_display(driver_module, config) when is_atom(driver_module) and is_map(config) do
+    apply(DisplaySupervisor, :display_controller, [driver_module, config])
+  end
+
+  @doc """
+  Executes a supported command that is specified.
+  """
+  def execute(pid, command) when is_pid(pid) do
+    apply(DisplayController, :execute, [pid, command])
+  end
 end
