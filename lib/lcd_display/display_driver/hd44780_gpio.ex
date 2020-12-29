@@ -219,11 +219,11 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok, enable_entry_mode_flag(display, @autoscroll)}
   end
 
-  def execute(display, :entry_right_to_left) do
+  def execute(display, {:text_direction, :right_to_left}) do
     {:ok, disable_entry_mode_flag(display, @entry_left)}
   end
 
-  def execute(display, :entry_left_to_right) do
+  def execute(display, {:text_direction, :left_to_right}) do
     {:ok, enable_entry_mode_flag(display, @entry_left)}
   end
 

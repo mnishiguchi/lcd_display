@@ -28,16 +28,15 @@ defmodule LcdDisplay.DisplayDriver do
   | ---------------------- | ------------------------------------------------------------- |
   | `:clear`               | Clear the display.                                            |
   | `:home`                | Move the cursor home.                                         |
-  | `:write`               | write a character (byte) at the current cursor.               |
-  | `:set_cursor`          | Move the cursor to the specified position (column and row).   |
+  | `:print`               | Print a text at the current cursor.                           |
+  | `:set_cursor`          | Set the cursor position (row and column).                     |
   | `:cursor`              | Switch on/off the underline cursor.                           |
-  | `:display`             | Switch on/off the display.                                    |
+  | `:display`             | Switch on/off the display without losing what is on it.       |
   | `:blink`               | Switch on/off the block cursor.                               |
-  | `:autoscroll`          | Automatically scroll the display when a charactor is written. |
+  | `:autoscroll`          | Make existing text shift when new text is printed.            |
   | `:backlight`           | Switch on/off the backlight.                                  |
-  | `:entry_right_to_left` | Text is printed from right to left.                           |
-  | `:entry_left_to_right` | Text is printed from left to right.                           |
-  | `:scroll`              | Scroll left/right the display.                                |
+  | `:text_direction`      | Make text flow left/right from the cursor.                    |
+  | `:scroll`              | Scroll text left and right.                                   |
   | `:left`                | Move the cursor left.                                         |
   | `:right`               | Move the cursor right.                                        |
   | `:char`                | Program custom character to CGRAM.                            |
@@ -46,15 +45,14 @@ defmodule LcdDisplay.DisplayDriver do
           :clear
           | :home
           | {:print, String.t()}
-          | {:write, charlist()}
           | {:set_cursor, integer(), integer()}
           | {:cursor, boolean()}
           | {:blink, boolean()}
           | {:display, boolean()}
           | {:autoscroll, boolean()}
           | {:backlight, boolean()}
-          | :entry_right_to_left
-          | :entry_left_to_right
+          | {:text_direction, :right_to_left}
+          | {:text_direction, :left_to_right}
           | {:scroll, integer()}
           | {:left, integer()}
           | {:right, integer()}

@@ -89,26 +89,8 @@ defmodule NervesHelloLcd do
     Process.sleep(1234)
   end
 
-  @doc """
-  NervesHelloLcd.read_dht11(26)
-  """
-  defp read_dht11(_, _retry = 0), do: :ignore
-
-  defp read_dht11(gpio_pin, retry \\ 3) do
-    case DHT.read(gpio_pin, :dht11) do
-      {:ok, result} ->
-        result
-
-      _ ->
-        Process.sleep(1000)
-        read_dht11(gpio_pin, retry - 1)
-    end
-  end
-
-  # TODO: Custom char?
-  # TODO: Endless autoscroll?
   defp autoscroll(pid) do
-    introduction(pid, "autoscroll")
+    introduction(pid, "Autoscroll")
 
     LcdDisplay.execute(pid, {:autoscroll, true})
     LcdDisplay.execute(pid, {:set_cursor, 1, 15})
@@ -119,10 +101,10 @@ defmodule NervesHelloLcd do
   defp text_direction(pid) do
     introduction(pid, "Text direction")
     LcdDisplay.execute(pid, {:set_cursor, 0, 15})
-    LcdDisplay.execute(pid, :entry_right_to_left)
+    LcdDisplay.execute(pid, {:text_direction, :right_to_left})
     print_text(pid)
     LcdDisplay.execute(pid, {:set_cursor, 1, 0})
-    LcdDisplay.execute(pid, :entry_left_to_right)
+    LcdDisplay.execute(pid, {:text_direction, :left_to_right})
     print_text(pid)
     Process.sleep(1234)
   end

@@ -100,13 +100,13 @@ defmodule LcdDisplay.HD44780.GPIOTest do
 
     test "execute unsupported commands", %{display: d} do
       assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:write, "Hello"})
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:entry_left_to_right, false})
+      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:text_direction, false})
       assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:char, "invalid args"})
     end
 
     test "change entry_mode", %{display: d} do
-      assert {:ok, %{entry_mode: 4}} = HD44780.GPIO.execute(d, :entry_right_to_left)
-      assert {:ok, %{entry_mode: 6}} = HD44780.GPIO.execute(d, :entry_left_to_right)
+      assert {:ok, %{entry_mode: 4}} = HD44780.GPIO.execute(d, {:text_direction, :right_to_left})
+      assert {:ok, %{entry_mode: 6}} = HD44780.GPIO.execute(d, {:text_direction, :left_to_right})
     end
 
     test "change display_control", %{display: d} do
