@@ -13,7 +13,8 @@ defmodule LcdDisplay.DisplayDriver do
           required(:cols) => integer(),
           required(:entry_mode) => integer(),
           required(:display_control) => integer(),
-          required(:backlight) => boolean()
+          required(:backlight) => boolean(),
+          atom() => any()
         }
 
   @typedoc """
