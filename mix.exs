@@ -11,7 +11,7 @@ defmodule LcdDisplay.MixProject do
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      name: "LcdDisplay",
+      build_embedded: Mix.env() == :prod,
       description: "Control an Liquid-crystal display (LCD) like Hitachi HD44780",
       deps: deps(),
       docs: docs(),
@@ -43,7 +43,8 @@ defmodule LcdDisplay.MixProject do
 
   defp docs do
     [
-      main: "LcdDisplay",
+      extras: ["README.md"],
+      main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url
     ]
@@ -51,9 +52,17 @@ defmodule LcdDisplay.MixProject do
 
   defp package do
     %{
+      files: [
+        "lib",
+        "mix.exs",
+        "README.md",
+        "LICENSE*"
+      ],
       licenses: ["MIT"],
-      maintainers: ["Masatoshi Nishiguchi"],
-      links: %{"GitHub" => @source_url}
+      links: %{
+        "GitHub" => @source_url,
+        "Hitachi HD44780 datasheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf"
+      }
     }
   end
 end
