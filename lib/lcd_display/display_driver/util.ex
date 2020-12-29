@@ -1,4 +1,8 @@
 defmodule LcdDisplay.DisplayDriver.Util do
+  @moduledoc """
+  A collection of utility functions that are used for display drivers.
+  """
+
   @doc """
   Determines a cursor position based on the number of rows, the number of columns,
   and the zero-indexed cursor row and column.

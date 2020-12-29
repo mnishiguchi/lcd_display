@@ -1,4 +1,8 @@
 defmodule LcdDisplay.ProcessRegistry do
+  @moduledoc """
+  Manages processes.
+  """
+
   def child_spec(_args) do
     Supervisor.child_spec(
       Registry,
