@@ -16,7 +16,7 @@ defmodule LcdDisplay.HD44780.GPIO do
         pin_d5: 24,
         pin_d6: 25,
         pin_d7: 26,
-        pin_led_5v: 12,
+        pin_led: 12,
       }
 
       # Start the LCD driver and get the initial display state.
@@ -72,7 +72,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     :pin_d6,
     :pin_d7
   ]
-  @optional_config_keys [:rows, :cols, :font_size, :pin_rw, :pin_led_5v]
+  @optional_config_keys [:rows, :cols, :font_size, :pin_rw, :pin_led]
 
   @default_rows 2
   @default_cols 16
@@ -284,7 +284,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp set_backlight(display, flag) when is_boolean(flag) do
-    with :ok <- ParallelBus.write(display.ref_led_5v, if(flag, do: 1, else: 0)), do: display
+    with :ok <- ParallelBus.write(display.ref_led, if(flag, do: 1, else: 0)), do: display
   end
 
   defp disable_entry_mode_flag(display, flag) do

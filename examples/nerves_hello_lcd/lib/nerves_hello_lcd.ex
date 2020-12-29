@@ -25,7 +25,7 @@ defmodule NervesHelloLcd do
       pin_d5: 24,
       pin_d6: 25,
       pin_d7: 26,
-      pin_led_5v: 12
+      pin_led: 12
     }
 
     pid = LcdDisplay.start_display(LcdDisplay.HD44780.GPIO, config)

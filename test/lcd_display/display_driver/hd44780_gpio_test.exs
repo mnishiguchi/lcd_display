@@ -37,7 +37,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
              pin_d5: 8,
              pin_d6: 9,
              pin_d7: 10,
-             pin_led_5v: 12,
+             pin_led: 12,
              ref_rs: ref_rs,
              ref_rw: ref_rw,
              ref_en: ref_en,
@@ -45,7 +45,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
              ref_d5: ref_d5,
              ref_d6: ref_d6,
              ref_d7: ref_d7,
-             ref_led_5v: ref_led_5v,
+             ref_led: ref_led,
              entry_mode: 6,
              display_control: 12
            } = display
@@ -57,7 +57,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
     assert is_reference(ref_d5)
     assert is_reference(ref_d6)
     assert is_reference(ref_d7)
-    assert is_reference(ref_led_5v)
+    assert is_reference(ref_led)
   end
 
   describe "required config keys" do
@@ -128,7 +128,7 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       pin_d5: 8,
       pin_d6: 9,
       pin_d7: 10,
-      pin_led_5v: 12
+      pin_led: 12
     }
   end
 
