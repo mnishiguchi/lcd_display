@@ -1,17 +1,17 @@
-defmodule LcdDisplay.Util do
+defmodule LcdDisplay.DisplayDriver.Util do
   @doc """
   Determines a cursor position based on the number of rows, the number of columns,
   and the zero-indexed cursor row and column.
 
   ## Examples
 
-      iex> LcdDisplay.Util.determine_cursor_position({2, 16}, {0,0})
+      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {0,0})
       0
-      iex> LcdDisplay.Util.determine_cursor_position({2, 16}, {0,15})
+      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {0,15})
       15
-      iex> LcdDisplay.Util.determine_cursor_position({2, 16}, {1,0})
+      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {1,0})
       64
-      iex> LcdDisplay.Util.determine_cursor_position({2, 16}, {1,15})
+      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {1,15})
       79
   """
   def determine_cursor_position({num_rows, num_cols}, {row, col})

@@ -28,7 +28,7 @@ defmodule LcdDisplay.HD44780.GPIO do
 
   use Bitwise
   require Logger
-  import LcdDisplay.Util
+  import LcdDisplay.DisplayDriver.Util
   alias LcdDisplay.GPIO, as: ParallelBus
 
   @behaviour LcdDisplay.DisplayDriver
@@ -89,9 +89,7 @@ defmodule LcdDisplay.HD44780.GPIO do
      opts
      |> initial_state()
      |> set_backlight(true)
-     |> initialize_display(
-       function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines
-     )}
+     |> initialize_display(function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines)}
   end
 
   @doc """
@@ -281,15 +279,12 @@ defmodule LcdDisplay.HD44780.GPIO do
 
   # Set the DDRAM address corresponding to the specified cursor position.
   defp set_cursor(display, cursor_row, cursor_col) when cursor_row >= 0 and cursor_col >= 0 do
-    cursor_position =
-      determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
-
+    cursor_position = determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
     write_instruction(display, @cmd_set_ddram_address ||| cursor_position)
   end
 
   defp set_backlight(display, flag) when is_boolean(flag) do
-    ParallelBus.write(display.ref_led_5v, if(flag, do: 1, else: 0))
-    display
+    with :ok <- ParallelBus.write(display.ref_led_5v, if(flag, do: 1, else: 0)), do: display
   end
 
   defp disable_entry_mode_flag(display, flag) do
@@ -320,8 +315,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
-  defp write_byte(display, byte, mode)
-       when is_integer(byte) and byte in 0..255 and mode in 0..1 do
+  defp write_byte(display, byte, mode) when is_integer(byte) and byte in 0..255 and mode in 0..1 do
     <<first::4, second::4>> = <<byte>>
 
     display
@@ -341,13 +335,11 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp register_select(display, flag) when flag in 0..1 do
-    :ok = ParallelBus.write(display.ref_rs, flag)
-    display
+    with :ok <- ParallelBus.write(display.ref_rs, flag), do: display
   end
 
   defp enable(display, flag) when flag in 0..1 do
-    :ok = ParallelBus.write(display.ref_en, flag)
-    display
+    with :ok <- ParallelBus.write(display.ref_en, flag), do: display
   end
 
   defp pulse_enable(display) do
@@ -355,7 +347,6 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp delay(display, milliseconds) do
-    Process.sleep(milliseconds)
-    display
+    with :ok <- Process.sleep(milliseconds), do: display
   end
 end

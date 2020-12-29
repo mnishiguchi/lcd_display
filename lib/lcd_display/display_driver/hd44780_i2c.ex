@@ -24,7 +24,7 @@ defmodule LcdDisplay.HD44780.I2C do
 
   use Bitwise
   require Logger
-  import LcdDisplay.Util
+  import LcdDisplay.DisplayDriver.Util
   alias LcdDisplay.I2C, as: SerialBus
 
   @behaviour LcdDisplay.DisplayDriver
@@ -115,15 +115,15 @@ defmodule LcdDisplay.HD44780.I2C do
   defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
-    |> write_four_bits(0x03 <<< 4)
+    |> write_four_bits(0x03)
     |> delay(5)
-    |> write_four_bits(0x03 <<< 4)
+    |> write_four_bits(0x03)
     |> delay(5)
-    |> write_four_bits(0x03 <<< 4)
+    |> write_four_bits(0x03)
     |> delay(1)
 
     # Function set (4-bit mode; Interface is 8 bits long)
-    |> write_four_bits(0x02 <<< 4)
+    |> write_four_bits(0x02)
 
     # Function set (4-bit mode; Interface is 4 bits long)
     # The number of display lines and character font cannot be changed after this point.
@@ -150,10 +150,7 @@ defmodule LcdDisplay.HD44780.I2C do
   # Write a string.
   def execute(display, {:print, string}) when is_binary(string) do
     # Translates a string to a charlist (list of bytes).
-    string
-    |> to_charlist()
-    |> Enum.each(&write_data(display, &1))
-
+    string |> to_charlist() |> Enum.each(&write_data(display, &1))
     {:ok, display}
   end
 
@@ -253,9 +250,7 @@ defmodule LcdDisplay.HD44780.I2C do
 
   # Set the DDRAM address corresponding to the specified cursor position.
   defp set_cursor(display, cursor_row, cursor_col) when cursor_row >= 0 and cursor_col >= 0 do
-    cursor_position =
-      determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
-
+    cursor_position = determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
     write_instruction(display, @cmd_set_ddram_address ||| cursor_position)
   end
 
@@ -293,14 +288,17 @@ defmodule LcdDisplay.HD44780.I2C do
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
   defp write_byte(display, byte, mode) when is_integer(byte) and mode in 0..1 do
+    <<high_four_bits::4, low_four_bits::4>> = <<byte>>
+
     display
-    |> write_four_bits((byte &&& 0xF0) ||| mode)
-    |> write_four_bits((byte <<< 4 &&& 0xF0) ||| mode)
+    |> write_four_bits(high_four_bits, mode)
+    |> write_four_bits(low_four_bits, mode)
   end
 
-  # Write 4 bits to the device
-  defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..255 do
-    display |> expander_write(bits) |> pulse_enable(bits)
+  defp write_four_bits(display, four_bits, mode \\ 0)
+       when is_integer(four_bits) and four_bits in 0..16 and mode in 0..1 do
+    byte = four_bits <<< 4 ||| mode
+    display |> expander_write(byte) |> pulse_enable(byte)
   end
 
   defp pulse_enable(display, byte) do
@@ -309,17 +307,14 @@ defmodule LcdDisplay.HD44780.I2C do
     |> expander_write(byte &&& ~~~@enable_bit)
   end
 
-  defp expander_write(display, byte)
-       when is_reference(display.i2c_ref) and is_integer(display.i2c_address) and
-              is_boolean(display.backlight) and is_integer(byte) do
-    %{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight} = display
+  defp expander_write(%{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight} = display, byte)
+       when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
     data = if(backlight, do: <<byte ||| @backlight_on>>, else: <<byte>>)
     :ok = SerialBus.write(i2c_ref, i2c_address, data)
     display
   end
 
   defp delay(display, milliseconds) do
-    Process.sleep(milliseconds)
-    display
+    with :ok <- Process.sleep(milliseconds), do: display
   end
 end

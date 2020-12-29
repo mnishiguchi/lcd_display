@@ -1,7 +1,10 @@
-defmodule LcdDisplay.CommunicationBus do
-  @moduledoc false
+defmodule LcdDisplay.GPIO do
+  @moduledoc """
+  Lets you control GPIOs.
+  A thin wrapper of [elixir-circuits/circuits_gpio](https://github.com/elixir-circuits/circuits_gpio).
+  """
 
-  defmodule GPIO do
+  defmodule Behaviour do
     @moduledoc """
     Defines a behaviour required for GPIO abstraction.
     """
@@ -9,22 +12,7 @@ defmodule LcdDisplay.CommunicationBus do
     @callback write(reference, 0 | 1) :: :ok | {:error, any}
   end
 
-  defmodule I2C do
-    @moduledoc """
-    Defines a behaviour required for I²C abstraction.
-    """
-    @callback open(binary) :: {:ok, reference} | {:error, any}
-    @callback write(reference, pos_integer, binary) :: :ok | {:error, any}
-  end
-end
-
-defmodule LcdDisplay.GPIO do
-  @moduledoc """
-  Lets you control GPIOs.
-  A thin wrapper of [elixir-circuits/circuits_gpio](https://github.com/elixir-circuits/circuits_gpio).
-  """
-
-  @behaviour LcdDisplay.CommunicationBus.GPIO
+  @behaviour LcdDisplay.GPIO.Behaviour
 
   def open(gpio_pin, :output), do: gpio_module().open(gpio_pin, :output)
 
@@ -43,7 +31,15 @@ defmodule LcdDisplay.I2C do
   A thin wrapper of [elixir-circuits/circuits_i2c](https://github.com/elixir-circuits/circuits_i2c).
   """
 
-  @behaviour LcdDisplay.CommunicationBus.I2C
+  defmodule Behaviour do
+    @moduledoc """
+    Defines a behaviour required for I²C abstraction.
+    """
+    @callback open(binary) :: {:ok, reference} | {:error, any}
+    @callback write(reference, pos_integer, binary) :: :ok | {:error, any}
+  end
+
+  @behaviour LcdDisplay.I2C.Behaviour
 
   def open(i2c_bus), do: i2c_module().open(i2c_bus)
 

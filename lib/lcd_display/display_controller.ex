@@ -13,16 +13,14 @@ defmodule LcdDisplay.DisplayController do
     }
   end
 
-  defp via_tuple({driver_module, _display_name} = key)
-       when is_tuple(key) and is_atom(driver_module) do
+  defp via_tuple({driver_module, _display_name} = key) when is_tuple(key) and is_atom(driver_module) do
     LcdDisplay.ProcessRegistry.via_tuple({__MODULE__, key})
   end
 
   @doc """
   Discovers a process by the composite key of driver module atom and display name.
   """
-  def whereis({driver_module, _display_name} = key)
-      when is_tuple(key) and is_atom(driver_module) do
+  def whereis({driver_module, _display_name} = key) when is_tuple(key) and is_atom(driver_module) do
     case LcdDisplay.ProcessRegistry.whereis_name({__MODULE__, key}) do
       :undefined -> nil
       pid -> pid
@@ -34,9 +32,7 @@ defmodule LcdDisplay.DisplayController do
   of driver module and display name.
   """
   def start_link(%{driver_module: driver_module, display_name: display_name} = initial_display) do
-    GenServer.start_link(__MODULE__, initial_display,
-      name: via_tuple({driver_module, display_name})
-    )
+    GenServer.start_link(__MODULE__, initial_display, name: via_tuple({driver_module, display_name}))
   end
 
   @doc """

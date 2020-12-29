@@ -28,7 +28,6 @@ defmodule LcdDisplay.DisplayDriver do
   | ---------------------- | ------------------------------------------------------------- |
   | `:clear`               | Clear the display.                                            |
   | `:home`                | Move the cursor home.                                         |
-  | `:print`               | Print a text at the current cursor.                           |
   | `:write`               | write a character (byte) at the current cursor.               |
   | `:set_cursor`          | Move the cursor to the specified position (column and row).   |
   | `:cursor`              | Switch on/off the underline cursor.                           |

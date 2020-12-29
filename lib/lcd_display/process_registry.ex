@@ -9,7 +9,9 @@ defmodule LcdDisplay.ProcessRegistry do
 
   @doc """
   Returns a standardized via-tuple for this registry.
+
   ## Examples
+
       iex> ProcessRegistry.via_tuple({DisplayController, 20})
       {:via, Registry, {ProcessRegistry, {DisplayController, 20}}}
   """
@@ -19,6 +21,7 @@ defmodule LcdDisplay.ProcessRegistry do
 
   @doc """
   Returns a PID or :undefined.
+
   ## Examples
       iex> ProcessRegistry.whereis_name({DisplayController, 20})
       #PID<0.235.0>
