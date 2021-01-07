@@ -24,7 +24,7 @@ end
 
 As an example, if you want to control a Hitachi HD44780 type display through
 [I²C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
-display driver.
+display driver. See the `LcdDisplay.DisplayDriver` documentation for supported display commands.
 
 ```elixir
 # Detect connected devices.
@@ -34,17 +34,17 @@ Circuits.I2C.detect_devices()
 pid =
   LcdDisplay.start_display(
     LcdDisplay.HD44780.I2C,      # A display driver module
-    # A config map
     %{
         display_name: "display 1", # the identifier
         i2c_bus: "i2c-1",          # I2C bus name
         i2c_address: 0x27,         # 7-bit address
         rows: 2,                   # the number of display rows
         cols: 16,                  # the number of display columns
+        font_size: "5x8"           # "5x10" or "5x8"
     }
   )
 
-# Run a command.
+# Run commands.
 LcdDisplay.execute(pid, {:print, "Hello world"})
 LcdDisplay.execute(pid, :clear)
 ```

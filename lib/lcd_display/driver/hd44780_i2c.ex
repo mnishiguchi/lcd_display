@@ -1,45 +1,40 @@
-defmodule LcdDisplay.HD44780.GPIO do
+defmodule LcdDisplay.HD44780.I2C do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display via GPIO pins.
-  Supports the 4-bit mode only.
-  You can turn on/off only one backlight LED.
+  Knows how to commuticate with HD44780 type display via I2C.
+  You can turn on/off one backlight LED.
 
   ## Examples
 
       alias LcdDisplay.HD44780
 
       config = %{
-        display_name: "display 1",
-        pin_rs: 2,
-        pin_rw: 3,
-        pin_en: 4,
-        pin_d4: 23,
-        pin_d5: 24,
-        pin_d6: 25,
-        pin_d7: 26,
-        pin_led: 12,
+        display_name: "display 1", # the identifier
+        i2c_bus: "i2c-1",          # I2C bus name
+        i2c_address: 0x27,         # 7-bit address
+        rows: 2,                   # the number of display rows
+        cols: 16,                  # the number of display columns
+        font_size: "5x8"           # "5x10" or "5x8"
       }
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.GPIO.start(config)
+      {:ok, display} = HD44780.I2C.start(config)
 
       # Run a command and the display state will be updated.
-      {:ok, display} = HD44780.GPIO.execute(display, {:print, "Hello world"})
+      {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
   """
 
   use Bitwise
   require Logger
   import LcdDisplay.DisplayDriver.Util
-  alias LcdDisplay.GPIO, as: ParallelBus
+  alias LcdDisplay.I2C, as: SerialBus
 
   @behaviour LcdDisplay.DisplayDriver
 
   # flags for function set
-  @mode_4bit 0x01
-  @font_size_5x8 0x00
   @font_size_5x10 0x04
-  @number_of_lines_1 0x00
+  @font_size_5x8 0x00
   @number_of_lines_2 0x08
+  @number_of_lines_1 0x00
 
   # commands
   @cmd_clear_display 0x01
@@ -64,17 +59,12 @@ defmodule LcdDisplay.HD44780.GPIO do
   @shift_display 0x08
   @shift_right 0x04
 
-  @required_config_keys [
-    :display_name,
-    :pin_rs,
-    :pin_en,
-    :pin_d4,
-    :pin_d5,
-    :pin_d6,
-    :pin_d7
-  ]
-  @optional_config_keys [:rows, :cols, :font_size, :pin_rw, :pin_led]
+  # flags for backlight control
+  @backlight_on 0x08
 
+  @enable_bit 0b00000100
+
+  @default_i2c_address 0x27
   @default_rows 2
   @default_cols 16
 
@@ -82,14 +72,6 @@ defmodule LcdDisplay.HD44780.GPIO do
   The configuration options.
   """
   @type config :: %{
-          required(:pin_rs) => pos_integer(),
-          required(:pin_rw) => pos_integer(),
-          required(:pin_en) => pos_integer(),
-          required(:pin_d4) => pos_integer(),
-          required(:pin_d5) => pos_integer(),
-          required(:pin_d6) => pos_integer(),
-          required(:pin_d7) => pos_integer(),
-          required(:pin_led) => pos_integer(),
           optional(:rows) => String.t(),
           optional(:cols) => pos_integer(),
           optional(:font_size) => pos_integer()
@@ -107,8 +89,10 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok,
      config
      |> initial_state()
-     |> set_backlight(true)
-     |> initialize_display(function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines)}
+     |> expander_write(@backlight_on)
+     |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
+  rescue
+    e -> {:error, e.message}
   end
 
   @doc """
@@ -117,26 +101,27 @@ defmodule LcdDisplay.HD44780.GPIO do
   @impl true
   def stop(display) do
     execute(display, {:display, false})
+    Circuits.I2C.close(display.i2c_bus)
     :ok
   end
 
   defp initial_state(opts) do
-    # Raise an error when required key is missing.
-    Enum.each(@required_config_keys, &Map.fetch!(opts, &1))
+    i2c_bus = opts[:i2c_bus] || "i2c-1"
+    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
 
-    opts
-    # Ensure that the datatype is map and remove garbage keys.
-    |> Map.take(@required_config_keys ++ @optional_config_keys)
-    |> Map.merge(%{
+    %{
       driver_module: __MODULE__,
+      display_name: opts[:display_name] || i2c_bus,
+      i2c_ref: i2c_ref,
+      i2c_address: opts[:i2c_address] || @default_i2c_address,
       rows: opts[:rows] || @default_rows,
       cols: opts[:cols] || @default_cols,
 
       # Initial values for features that we can change later.
       entry_mode: @cmd_entry_mode_set ||| @entry_left,
-      display_control: @cmd_display_control ||| @display_on
-    })
-    |> open_gpio_pins()
+      display_control: @cmd_display_control ||| @display_on,
+      backlight: true
+    }
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
@@ -161,21 +146,6 @@ defmodule LcdDisplay.HD44780.GPIO do
     |> write_feature(:entry_mode)
   end
 
-  # Setup GPIO output pins, merge the refs to the config map.
-  defp open_gpio_pins(config) do
-    refs =
-      config
-      |> Enum.filter(fn {key, _} -> String.starts_with?("#{key}", "pin_") end)
-      |> Enum.map(fn {pin_name, pin_number} ->
-        {:ok, gpio_ref} = ParallelBus.open(pin_number, :output)
-        key = String.replace("#{pin_name}", "pin", "ref") |> String.to_atom()
-        {key, gpio_ref}
-      end)
-      |> Enum.into(%{})
-
-    Map.merge(config, refs)
-  end
-
   @doc """
   Executes the specified command and returns a new display state.
   """
@@ -193,12 +163,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   # Write a string.
   def execute(display, {:print, string}) when is_binary(string) do
     # Translates a string to a charlist (list of bytes).
-    execute(display, {:write, to_charlist(string)})
-  end
-
-  # Writes a list of integers.
-  def execute(display, {:write, bytes}) when is_list(bytes) do
-    Enum.each(bytes, &write_data(display, &1))
+    string |> to_charlist() |> Enum.each(&write_data(display, &1))
     {:ok, display}
   end
 
@@ -258,7 +223,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   # Scroll the entire display right
-  def execute(display, {:scroll, cols}) do
+  def execute(display, {:scroll, cols}) when cols > 0 do
     write_instruction(display, @cmd_cursor_shift_control ||| @shift_display ||| @shift_right)
     execute(display, {:scroll, cols - 1})
   end
@@ -286,7 +251,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok, display}
   end
 
-  def execute(display, _), do: {:unsupported, display}
+  def execute(_display, command), do: {:unsupported, command}
 
   defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 
@@ -303,7 +268,8 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp set_backlight(display, flag) when is_boolean(flag) do
-    with :ok <- ParallelBus.write(display.ref_led, if(flag, do: 1, else: 0)), do: display
+    # Set backlight and write 0 (nothing) to trigger it.
+    %{display | backlight: flag} |> expander_write(0)
   end
 
   defp disable_entry_mode_flag(display, flag) do
@@ -334,35 +300,31 @@ defmodule LcdDisplay.HD44780.GPIO do
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
-  defp write_byte(display, byte, mode) when is_integer(byte) and byte in 0..255 and mode in 0..1 do
-    <<first::4, second::4>> = <<byte>>
+  defp write_byte(display, byte, mode) when is_integer(byte) and mode in 0..1 do
+    <<high_four_bits::4, low_four_bits::4>> = <<byte>>
 
     display
-    |> register_select(mode)
-    |> delay(1)
-    |> write_four_bits(first)
-    |> write_four_bits(second)
+    |> write_four_bits(high_four_bits, mode)
+    |> write_four_bits(low_four_bits, mode)
   end
 
-  defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..15 do
-    <<bit1::1, bit2::1, bit3::1, bit4::1>> = <<bits::4>>
-    :ok = ParallelBus.write(display.ref_d4, bit4)
-    :ok = ParallelBus.write(display.ref_d5, bit3)
-    :ok = ParallelBus.write(display.ref_d6, bit2)
-    :ok = ParallelBus.write(display.ref_d7, bit1)
-    pulse_enable(display)
+  defp write_four_bits(display, four_bits, mode \\ 0)
+       when is_integer(four_bits) and four_bits in 0..16 and mode in 0..1 do
+    byte = four_bits <<< 4 ||| mode
+    display |> expander_write(byte) |> pulse_enable(byte)
   end
 
-  defp register_select(display, flag) when flag in 0..1 do
-    with :ok <- ParallelBus.write(display.ref_rs, flag), do: display
+  defp pulse_enable(display, byte) do
+    display
+    |> expander_write(byte ||| @enable_bit)
+    |> expander_write(byte &&& ~~~@enable_bit)
   end
 
-  defp enable(display, flag) when flag in 0..1 do
-    with :ok <- ParallelBus.write(display.ref_en, flag), do: display
-  end
-
-  defp pulse_enable(display) do
-    display |> enable(1) |> enable(0)
+  defp expander_write(%{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight} = display, byte)
+       when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
+    data = if(backlight, do: <<byte ||| @backlight_on>>, else: <<byte>>)
+    :ok = SerialBus.write(i2c_ref, i2c_address, data)
+    display
   end
 
   defp delay(display, milliseconds) do

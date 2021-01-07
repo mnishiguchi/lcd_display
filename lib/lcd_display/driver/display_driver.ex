@@ -74,5 +74,5 @@ defmodule LcdDisplay.DisplayDriver do
   @doc """
   Executes the specified command and returns a new display state.
   """
-  @callback execute(t, command) :: {:ok, t} | {:error, any()}
+  @callback execute(t, command) :: {:ok, t} | {:error, any}
 end

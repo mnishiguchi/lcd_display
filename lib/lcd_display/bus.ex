@@ -8,7 +8,10 @@ defmodule LcdDisplay.GPIO do
     @moduledoc """
     Defines a behaviour required for GPIO abstraction.
     """
-    @callback open(pos_integer, :output) :: {:ok, reference} | {:error, any}
+
+    @type gpio_pin :: pos_integer
+
+    @callback open(gpio_pin, :output) :: {:ok, reference} | {:error, any}
     @callback write(reference, 0 | 1) :: :ok | {:error, any}
   end
 
@@ -35,8 +38,13 @@ defmodule LcdDisplay.I2C do
     @moduledoc """
     Defines a behaviour required for I²C abstraction.
     """
-    @callback open(binary) :: {:ok, reference} | {:error, any}
-    @callback write(reference, pos_integer, binary) :: :ok | {:error, any}
+
+    @type i2c_bus :: String.t()
+    @type i2c_address :: byte()
+    @type data :: byte()
+
+    @callback open(i2c_bus) :: {:ok, reference} | {:error, any}
+    @callback write(reference, i2c_address, data) :: :ok | {:error, any}
   end
 
   @behaviour LcdDisplay.I2C.Behaviour

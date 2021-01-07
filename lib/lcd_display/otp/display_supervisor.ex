@@ -26,7 +26,14 @@ defmodule LcdDisplay.DisplaySupervisor do
 
       pid = DisplaySupervisor.display_controller(
         LcdDisplay.HD44780.I2C,
-        %{display_name: "display 1"}
+        %{
+          display_name: "display 1", # the identifier
+          i2c_bus: "i2c-1",          # I2C bus name
+          i2c_address: 0x27,         # 7-bit address
+          rows: 2,                   # the number of display rows
+          cols: 16,                  # the number of display columns
+          font_size: "5x8"           # "5x10" or "5x8"
+        }
       )
   """
   def display_controller(driver_module, config) when is_atom(driver_module) and is_map(config) do
