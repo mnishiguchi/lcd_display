@@ -5,6 +5,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   You can turn on/off only one backlight LED.
 
   ## Examples
+
       alias LcdDisplay.HD44780
 
       config = %{
@@ -77,16 +78,34 @@ defmodule LcdDisplay.HD44780.GPIO do
   @default_rows 2
   @default_cols 16
 
+  @typedoc """
+  The configuration options.
+  """
+  @type config :: %{
+          required(:pin_rs) => pos_integer(),
+          required(:pin_rw) => pos_integer(),
+          required(:pin_en) => pos_integer(),
+          required(:pin_d4) => pos_integer(),
+          required(:pin_d5) => pos_integer(),
+          required(:pin_d6) => pos_integer(),
+          required(:pin_d7) => pos_integer(),
+          required(:pin_led) => pos_integer(),
+          optional(:rows) => String.t(),
+          optional(:cols) => pos_integer(),
+          optional(:font_size) => pos_integer()
+        }
+
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
   @impl true
-  def start(opts) do
-    number_of_lines = if opts[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
-    font_size = if opts[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
+  @spec start(config()) :: {:ok, LcdDisplay.DisplayDriver.t()} | {:error, any()}
+  def start(config) do
+    number_of_lines = if config[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
+    font_size = if config[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
 
     {:ok,
-     opts
+     config
      |> initial_state()
      |> set_backlight(true)
      |> initialize_display(function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines)}

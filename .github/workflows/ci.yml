@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11]
-        otp: [23.2]
+        otp: [23]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11]
-        otp: [23.2]
+        otp: [23]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -106,7 +106,7 @@ jobs:
       fail-fast: false
       matrix:
         elixir: [1.11]
-        otp: [23.2]
+        otp: [23]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0

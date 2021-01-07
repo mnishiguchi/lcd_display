@@ -1,7 +1,7 @@
 # LcdDisplay
 
 [![Hex.pm](https://img.shields.io/hexpm/v/lcd_display.svg)](https://hex.pm/packages/lcd_display)
-[![API docs](https://img.shields.io/hexpm/v/lcd_display.svg?label=hexdocs)](https://hexdocs.pm/lcd_display/LcdDisplay.html)
+[![API docs](https://img.shields.io/hexpm/v/lcd_display.svg?label=docs)](https://hexdocs.pm/lcd_display/LcdDisplay.html)
 ![CI](https://github.com/mnishiguchi/lcd_display/workflows/CI/badge.svg)
 
 `LcdDisplay` is a simple [Elixir](https://elixir-lang.org/) library that allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller).
@@ -27,11 +27,21 @@ As an example, if you want to control a Hitachi HD44780 type display through
 display driver.
 
 ```elixir
+# Detect connected devices.
+Circuits.I2C.detect_devices()
+
 # Start the LCD driver and get a PID.
 pid =
   LcdDisplay.start_display(
     LcdDisplay.HD44780.I2C,      # A display driver module
-    %{display_name: "display 1"} # A config map
+    # A config map
+    %{
+        display_name: "display 1", # the identifier
+        i2c_bus: "i2c-1",          # I2C bus name
+        i2c_address: 0x27,         # 7-bit address
+        rows: 2,                   # the number of display rows
+        cols: 16,                  # the number of display columns
+    }
   )
 
 # Run a command.

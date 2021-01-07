@@ -6,7 +6,7 @@ defmodule LcdDisplay.DisplayDriver do
   @typedoc """
   Type that represents the display state.
   """
-  @type display :: %{
+  @type t :: %{
           required(:driver_module) => atom(),
           required(:display_name) => String.t(),
           required(:rows) => integer(),
@@ -59,18 +59,20 @@ defmodule LcdDisplay.DisplayDriver do
           | {:right, integer()}
           | {:char, integer(), byte()}
 
+  @type config :: map()
+
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
-  @callback start(map) :: {:ok | :error, display}
+  @callback start(config) :: {:ok, t} | {:error, any}
 
   @doc """
   Stops the LCD driver.
   """
-  @callback stop(display) :: :ok
+  @callback stop(t) :: :ok
 
   @doc """
   Executes the specified command and returns a new display state.
   """
-  @callback execute(display, command) :: {:ok, display} | {:error, any()}
+  @callback execute(t, command) :: {:ok, t} | {:error, any()}
 end
