@@ -39,7 +39,8 @@ defmodule LcdDisplay.DisplayController do
   Delegates the specified operation to the display driver, and updates the state as needed.
 
   ## Examples
-    DisplayController.execute(pid, {:print, "Hello"})
+
+      DisplayController.execute(pid, {:print, "Hello"})
   """
   def execute(pid, command), do: GenServer.call(pid, command)
 

@@ -6,6 +6,8 @@ defmodule LcdDisplay.DisplaySupervisor do
   # https://hexdocs.pm/elixir/DynamicSupervisor.html
   use DynamicSupervisor
 
+  require Logger
+
   alias LcdDisplay.DisplayController
 
   def start_link(_args) do
@@ -18,19 +20,24 @@ defmodule LcdDisplay.DisplaySupervisor do
   end
 
   @doc """
-  Finds or creates a DisplayController process.
+  Creates a `LcdDisplay.DisplayController` process.
 
   ## Examples
 
-    pid = DisplaySupervisor.display_controller(
-      LcdDisplay.HD44780.I2C,
-      %{display_name: "display 1"}
-    )
+      pid = DisplaySupervisor.display_controller(
+        LcdDisplay.HD44780.I2C,
+        %{display_name: "display 1"}
+      )
   """
   def display_controller(driver_module, config) when is_atom(driver_module) and is_map(config) do
     case DisplayController.whereis({driver_module, config.display_name}) do
-      nil -> start_child(driver_module, config)
-      pid -> pid
+      nil ->
+        start_child(driver_module, config)
+
+      pid ->
+        Logger.info("Recreating the display controller for #{driver_module}")
+        Process.exit(pid, :kill)
+        display_controller(driver_module, config)
     end
   end
 

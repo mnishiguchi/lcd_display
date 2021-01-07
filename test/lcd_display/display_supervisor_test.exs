@@ -24,14 +24,15 @@ defmodule LcdDisplay.DisplaySupervisorTest do
           %{display_name: "display 1"}
         )
 
-      pid2 =
+      assert is_pid(pid1)
+
+      _pid2 =
         DisplaySupervisor.display_controller(
           LcdDisplay.MockDisplayDriver,
           %{display_name: "display 1"}
         )
 
-      assert is_pid(pid1)
-      assert pid1 == pid2
+      refute Process.alive?(pid1)
     end
 
     test "returns a different pid for a different display name" do

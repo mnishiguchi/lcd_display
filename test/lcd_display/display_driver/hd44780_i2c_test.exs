@@ -20,8 +20,8 @@ defmodule LcdDisplay.HD44780.I2CTest do
     assert :ok = LcdDisplay.I2C.write(i2c_ref, 0x20, <<0x00, 0x0F>>)
   end
 
-  test "start with no options" do
-    assert {:ok, display} = HD44780.I2C.start()
+  test "start with blank options" do
+    assert {:ok, display} = HD44780.I2C.start(%{})
 
     assert %{
              driver_module: LcdDisplay.HD44780.I2C,
