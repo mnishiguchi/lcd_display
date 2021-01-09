@@ -24,7 +24,7 @@ end
 
 As an example, if you want to control a Hitachi HD44780 type display through
 [I²C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
-display driver. See the `LcdDisplay.DisplayDriver` documentation for supported display commands.
+display driver. See the `LcdDisplay.Driver` documentation for supported display commands.
 
 ```elixir
 # Detect connected devices.

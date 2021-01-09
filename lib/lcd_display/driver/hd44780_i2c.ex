@@ -25,10 +25,10 @@ defmodule LcdDisplay.HD44780.I2C do
 
   use Bitwise
   require Logger
-  import LcdDisplay.DisplayDriver.Util
+  import LcdDisplay.DriverUtil
   alias LcdDisplay.I2C, as: SerialBus
 
-  @behaviour LcdDisplay.DisplayDriver
+  @behaviour LcdDisplay.Driver
 
   # flags for function set
   @font_size_5x10 0x04
@@ -81,7 +81,7 @@ defmodule LcdDisplay.HD44780.I2C do
   Initializes the LCD driver and returns the initial display state.
   """
   @impl true
-  @spec start(config()) :: {:ok, LcdDisplay.DisplayDriver.t()} | {:error, any()}
+  @spec start(config()) :: {:ok, LcdDisplay.Driver.t()} | {:error, any()}
   def start(config) do
     number_of_lines = if config[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
     font_size = if config[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8

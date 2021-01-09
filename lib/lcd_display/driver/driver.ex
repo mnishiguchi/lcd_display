@@ -1,4 +1,4 @@
-defmodule LcdDisplay.DisplayDriver do
+defmodule LcdDisplay.Driver do
   @moduledoc """
   Defines a behaviour required for an LCD driver.
   """

@@ -20,7 +20,7 @@ defmodule LcdDisplay.DisplaySupervisorTest do
 
       pid1 =
         DisplaySupervisor.display_controller(
-          LcdDisplay.MockDisplayDriver,
+          LcdDisplay.MockDriver,
           %{display_name: "display 1"}
         )
 
@@ -28,7 +28,7 @@ defmodule LcdDisplay.DisplaySupervisorTest do
 
       _pid2 =
         DisplaySupervisor.display_controller(
-          LcdDisplay.MockDisplayDriver,
+          LcdDisplay.MockDriver,
           %{display_name: "display 1"}
         )
 
@@ -40,7 +40,7 @@ defmodule LcdDisplay.DisplaySupervisorTest do
 
       pid1 =
         DisplaySupervisor.display_controller(
-          LcdDisplay.MockDisplayDriver,
+          LcdDisplay.MockDriver,
           %{display_name: "display 1"}
         )
 
@@ -48,7 +48,7 @@ defmodule LcdDisplay.DisplaySupervisorTest do
 
       pid2 =
         DisplaySupervisor.display_controller(
-          LcdDisplay.MockDisplayDriver,
+          LcdDisplay.MockDriver,
           %{display_name: "display 2"}
         )
 
@@ -58,14 +58,14 @@ defmodule LcdDisplay.DisplaySupervisorTest do
 
   defp setup_display_driver_mock(display_name) do
     # https://hexdocs.pm/mox/Mox.html#stub/3
-    LcdDisplay.MockDisplayDriver
+    LcdDisplay.MockDriver
     |> stub(:start, fn _opts -> {:ok, display_stub(display_name)} end)
     |> stub(:execute, fn _display, _command -> {:ok, display_stub(display_name)} end)
   end
 
   defp display_stub(display_name) do
     %{
-      driver_module: LcdDisplay.MockDisplayDriver,
+      driver_module: LcdDisplay.MockDriver,
       display_name: display_name,
       i2c_address: 39,
       i2c_ref: make_ref(),

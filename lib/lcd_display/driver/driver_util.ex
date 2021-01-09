@@ -1,4 +1,4 @@
-defmodule LcdDisplay.DisplayDriver.Util do
+defmodule LcdDisplay.DriverUtil do
   @moduledoc """
   A collection of utility functions that are used for display drivers.
   """
@@ -9,13 +9,13 @@ defmodule LcdDisplay.DisplayDriver.Util do
 
   ## Examples
 
-      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {0,0})
+      iex> LcdDisplay.DriverUtil.determine_cursor_position({2, 16}, {0,0})
       0
-      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {0,15})
+      iex> LcdDisplay.DriverUtil.determine_cursor_position({2, 16}, {0,15})
       15
-      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {1,0})
+      iex> LcdDisplay.DriverUtil.determine_cursor_position({2, 16}, {1,0})
       64
-      iex> LcdDisplay.DisplayDriver.Util.determine_cursor_position({2, 16}, {1,15})
+      iex> LcdDisplay.DriverUtil.determine_cursor_position({2, 16}, {1,15})
       79
   """
   def determine_cursor_position({num_rows, num_cols}, {row, col})
