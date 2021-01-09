@@ -25,9 +25,6 @@ defmodule LcdDisplay.ProcessRegistry do
     {:via, Registry, {__MODULE__, key}}
   end
 
-  @doc """
-  Returns a PID or :undefined.
-  """
   @spec whereis_name(any) :: :undefined | pid
   def whereis_name(key) when is_tuple(key) do
     Registry.whereis_name({__MODULE__, key})

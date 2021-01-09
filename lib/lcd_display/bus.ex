@@ -36,7 +36,7 @@ defmodule LcdDisplay.I2C do
 
   defmodule Behaviour do
     @moduledoc """
-    Defines a behaviour required for I²C abstraction.
+    Defines a behaviour required for I2C abstraction.
     """
 
     @type i2c_bus :: String.t()

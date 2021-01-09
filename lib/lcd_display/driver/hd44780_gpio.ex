@@ -90,8 +90,8 @@ defmodule LcdDisplay.HD44780.GPIO do
           required(:pin_d6) => pos_integer(),
           required(:pin_d7) => pos_integer(),
           required(:pin_led) => pos_integer(),
-          optional(:rows) => String.t(),
-          optional(:cols) => pos_integer(),
+          optional(:rows) => 1..4,
+          optional(:cols) => 8..20,
           optional(:font_size) => pos_integer()
         }
 
@@ -294,9 +294,9 @@ defmodule LcdDisplay.HD44780.GPIO do
 
   # Set the DDRAM address corresponding to the specified cursor position.
   @spec set_cursor(LcdDisplay.Driver.t(), pos_integer(), pos_integer()) :: LcdDisplay.Driver.t()
-  defp set_cursor(display, cursor_row, cursor_col) when cursor_row >= 0 and cursor_col >= 0 do
-    cursor_position = determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
-    write_instruction(display, @cmd_set_ddram_address ||| cursor_position)
+  defp set_cursor(display, row, col) when row >= 0 and col >= 0 do
+    ddram_address = determine_ddram_address({row, col}, Map.take(display, [:rows, :cols]))
+    write_instruction(display, @cmd_set_ddram_address ||| ddram_address)
   end
 
   @spec set_backlight(LcdDisplay.Driver.t(), boolean()) :: LcdDisplay.Driver.t()
@@ -335,6 +335,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
+
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
   @spec write_byte(LcdDisplay.Driver.t(), byte(), 0 | 1) :: LcdDisplay.Driver.t()

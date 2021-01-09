@@ -17,7 +17,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.15"}
+    {:lcd_display, "0.0.16"}
   ]
 end
 ```
@@ -42,7 +42,7 @@ Devices on I2C bus "i2c-1":
 2 devices detected on 1 I2C buses
 ```
 
-### Start an LCD driver and get a PID.
+### Start an LCD driver and get a PID
 
 ```elixir
 driver_module = LcdDisplay.HD44780.I2C

@@ -3,14 +3,17 @@ defmodule LcdDisplay.Driver do
   Defines a behaviour required for an LCD driver.
   """
 
+  @type num_rows :: 1..4
+  @type num_cols :: 8..20
+
   @typedoc """
   Type that represents the display state.
   """
   @type t :: %{
           required(:driver_module) => atom(),
           required(:display_name) => any(),
-          required(:rows) => pos_integer(),
-          required(:cols) => pos_integer(),
+          required(:rows) => num_rows(),
+          required(:cols) => num_cols(),
           required(:entry_mode) => byte(),
           required(:display_control) => byte(),
           required(:backlight) => boolean(),
