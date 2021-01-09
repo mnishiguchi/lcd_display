@@ -1,7 +1,7 @@
 defmodule LcdDisplay.MixProject do
   use Mix.Project
 
-  @version "0.0.13"
+  @version "0.0.15"
   @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
@@ -12,7 +12,7 @@ defmodule LcdDisplay.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
-      description: "Control an Liquid-crystal display (LCD) like Hitachi HD44780",
+      description: "Control a Liquid-crystal display (LCD) like Hitachi HD44780 from Elixir",
       deps: deps(),
       docs: docs(),
       package: package()

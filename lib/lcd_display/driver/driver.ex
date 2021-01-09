@@ -8,11 +8,11 @@ defmodule LcdDisplay.Driver do
   """
   @type t :: %{
           required(:driver_module) => atom(),
-          required(:display_name) => String.t(),
-          required(:rows) => integer(),
-          required(:cols) => integer(),
-          required(:entry_mode) => integer(),
-          required(:display_control) => integer(),
+          required(:display_name) => any(),
+          required(:rows) => pos_integer(),
+          required(:cols) => pos_integer(),
+          required(:entry_mode) => byte(),
+          required(:display_control) => byte(),
           required(:backlight) => boolean(),
           atom() => any()
         }
@@ -65,11 +65,6 @@ defmodule LcdDisplay.Driver do
   Initializes the LCD driver and returns the initial display state.
   """
   @callback start(config) :: {:ok, t} | {:error, any}
-
-  @doc """
-  Stops the LCD driver.
-  """
-  @callback stop(t) :: :ok
 
   @doc """
   Executes the specified command and returns a new display state.

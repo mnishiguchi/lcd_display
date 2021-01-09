@@ -113,15 +113,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     e -> {:error, e.message || "Error starting #{__MODULE__}"}
   end
 
-  @doc """
-  Stops the LCD driver.
-  """
-  @impl true
-  def stop(display) do
-    execute(display, {:display, false})
-    :ok
-  end
-
+  @spec initial_state(config()) :: LcdDisplay.Driver.t() | no_return()
   defp initial_state(opts) do
     # Raise an error when required key is missing.
     Enum.each(@required_config_keys, &Map.fetch!(opts, &1))
@@ -142,6 +134,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
+  @spec initialize_display(LcdDisplay.Driver.t(), list()) :: LcdDisplay.Driver.t() | no_return()
   defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
@@ -164,6 +157,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   end
 
   # Setup GPIO output pins, merge the refs to the config map.
+  @spec open_gpio_pins(map()) :: map() | no_return()
   defp open_gpio_pins(config) do
     refs =
       config
@@ -288,7 +282,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     {:ok, display}
   end
 
-  def execute(display, _), do: {:unsupported, display}
+  def execute(_display, command), do: {:error, {:unsupported, command}}
 
   defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 
@@ -299,36 +293,43 @@ defmodule LcdDisplay.HD44780.GPIO do
   ##
 
   # Set the DDRAM address corresponding to the specified cursor position.
+  @spec set_cursor(LcdDisplay.Driver.t(), pos_integer(), pos_integer()) :: LcdDisplay.Driver.t()
   defp set_cursor(display, cursor_row, cursor_col) when cursor_row >= 0 and cursor_col >= 0 do
     cursor_position = determine_cursor_position({display.rows, display.cols}, {cursor_row, cursor_col})
     write_instruction(display, @cmd_set_ddram_address ||| cursor_position)
   end
 
+  @spec set_backlight(LcdDisplay.Driver.t(), boolean()) :: LcdDisplay.Driver.t()
   defp set_backlight(display, flag) when is_boolean(flag) do
     with :ok <- ParallelBus.write(display.ref_led, if(flag, do: 1, else: 0)), do: display
   end
 
+  @spec disable_entry_mode_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
   defp disable_entry_mode_flag(display, flag) do
     entry_mode = display.entry_mode &&& ~~~flag
     %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
   end
 
+  @spec enable_entry_mode_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
   defp enable_entry_mode_flag(display, flag) do
     entry_mode = display.entry_mode ||| flag
     %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
   end
 
+  @spec disable_display_control_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
   defp disable_display_control_flag(display, flag) do
     display_control = display.display_control &&& ~~~flag
     %{display | display_control: display_control} |> write_feature(:display_control)
   end
 
+  @spec enable_display_control_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
   defp enable_display_control_flag(display, flag) do
     display_control = display.display_control ||| flag
     %{display | display_control: display_control} |> write_feature(:display_control)
   end
 
   # Write a feature based on the display state.
+  @spec write_feature(LcdDisplay.Driver.t(), LcdDisplay.Driver.feature()) :: LcdDisplay.Driver.t()
   defp write_feature(display, feature_key) when is_atom(feature_key) do
     display |> write_instruction(Map.fetch!(display, feature_key))
   end
@@ -336,6 +337,7 @@ defmodule LcdDisplay.HD44780.GPIO do
   defp write_instruction(display, byte), do: write_byte(display, byte, 0)
   defp write_data(display, byte), do: write_byte(display, byte, 1)
 
+  @spec write_byte(LcdDisplay.Driver.t(), byte(), 0 | 1) :: LcdDisplay.Driver.t()
   defp write_byte(display, byte, mode) when is_integer(byte) and byte in 0..255 and mode in 0..1 do
     <<first::4, second::4>> = <<byte>>
 
@@ -346,6 +348,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     |> write_four_bits(second)
   end
 
+  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, bits) when is_integer(bits) and bits in 0..15 do
     <<bit1::1, bit2::1, bit3::1, bit4::1>> = <<bits::4>>
     :ok = ParallelBus.write(display.ref_d4, bit4)
@@ -355,18 +358,22 @@ defmodule LcdDisplay.HD44780.GPIO do
     pulse_enable(display)
   end
 
+  @spec register_select(LcdDisplay.Driver.t(), 0 | 1) :: LcdDisplay.Driver.t()
   defp register_select(display, flag) when flag in 0..1 do
     with :ok <- ParallelBus.write(display.ref_rs, flag), do: display
   end
 
+  @spec enable(LcdDisplay.Driver.t(), 0 | 1) :: LcdDisplay.Driver.t()
   defp enable(display, flag) when flag in 0..1 do
     with :ok <- ParallelBus.write(display.ref_en, flag), do: display
   end
 
+  @spec pulse_enable(LcdDisplay.Driver.t()) :: LcdDisplay.Driver.t()
   defp pulse_enable(display) do
     display |> enable(1) |> enable(0)
   end
 
+  @spec delay(LcdDisplay.Driver.t(), pos_integer()) :: LcdDisplay.Driver.t()
   defp delay(display, milliseconds) do
     with :ok <- Process.sleep(milliseconds), do: display
   end

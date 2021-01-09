@@ -67,9 +67,9 @@ defmodule LcdDisplay.HD44780.I2CTest do
     end
 
     test "execute unsupported commands", %{display: d} do
-      assert {:unsupported, _command} = HD44780.I2C.execute(d, {:write, 'H'})
-      assert {:unsupported, _command} = HD44780.I2C.execute(d, {:text_direction, false})
-      assert {:unsupported, _command} = HD44780.I2C.execute(d, {:char, "invalid args"})
+      assert {:error, {:unsupported, _command}} = HD44780.I2C.execute(d, {:write, 'H'})
+      assert {:error, {:unsupported, _command}} = HD44780.I2C.execute(d, {:text_direction, false})
+      assert {:error, {:unsupported, _command}} = HD44780.I2C.execute(d, {:char, "invalid args"})
     end
 
     test "change entry_mode", %{display: d} do

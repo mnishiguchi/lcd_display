@@ -64,13 +64,13 @@ defmodule LcdDisplay.HD44780.GPIOTest do
     test "start with missing required keys" do
       c = default_config()
       error_tuple = {:error, "Error starting Elixir.LcdDisplay.HD44780.GPIO"}
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:display_name]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_rs]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_en]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_d4]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_d5]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_d6]))
-      assert error_tuple = HD44780.GPIO.start(Map.drop(c, [:pin_d7]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:display_name]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_rs]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_en]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d4]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d5]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d6]))
+      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d7]))
     end
   end
 
@@ -100,9 +100,9 @@ defmodule LcdDisplay.HD44780.GPIOTest do
     end
 
     test "execute unsupported commands", %{display: d} do
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:write, "Hello"})
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:text_direction, false})
-      assert {:unsupported, %{}} = HD44780.GPIO.execute(d, {:char, "invalid args"})
+      assert {:error, {:unsupported, _command}} = HD44780.GPIO.execute(d, {:write, "Hello"})
+      assert {:error, {:unsupported, _command}} = HD44780.GPIO.execute(d, {:text_direction, false})
+      assert {:error, {:unsupported, _command}} = HD44780.GPIO.execute(d, {:char, "invalid args"})
     end
 
     test "change entry_mode", %{display: d} do

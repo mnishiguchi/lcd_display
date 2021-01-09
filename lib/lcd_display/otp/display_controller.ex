@@ -20,7 +20,8 @@ defmodule LcdDisplay.DisplayController do
   @doc """
   Discovers a process by the composite key of driver module atom and display name.
   """
-  def whereis({driver_module, _display_name} = key) when is_tuple(key) and is_atom(driver_module) do
+  @spec whereis({atom, any}) :: pid | nil
+  def whereis({driver_module, _display_name} = key) when is_atom(driver_module) do
     case LcdDisplay.ProcessRegistry.whereis_name({__MODULE__, key}) do
       :undefined -> nil
       pid -> pid

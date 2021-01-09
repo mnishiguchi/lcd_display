@@ -3,6 +3,7 @@ defmodule LcdDisplay.ProcessRegistry do
   Manages processes.
   """
 
+  @spec child_spec(any) :: Supervisor.child_spec()
   def child_spec(_args) do
     Supervisor.child_spec(
       Registry,
@@ -19,19 +20,15 @@ defmodule LcdDisplay.ProcessRegistry do
       iex> ProcessRegistry.via_tuple(SomeKey)
       {:via, Registry, {ProcessRegistry, SomeKey}}
   """
-  def via_tuple(key) when is_tuple(key) do
+  @spec via_tuple(any) :: {:via, Registry, {LcdDisplay.ProcessRegistry, any}}
+  def via_tuple(key) do
     {:via, Registry, {__MODULE__, key}}
   end
 
   @doc """
   Returns a PID or :undefined.
-
-      iex> ProcessRegistry.whereis_name(SomeKey)
-      #PID<0.235.0>
-
-      iex> ProcessRegistry.whereis_name(OtherKey)
-      :undefined
   """
+  @spec whereis_name(any) :: :undefined | pid
   def whereis_name(key) when is_tuple(key) do
     Registry.whereis_name({__MODULE__, key})
   end
@@ -39,6 +36,7 @@ defmodule LcdDisplay.ProcessRegistry do
   @doc """
   Starts a unique registry.
   """
+  @spec start_link :: {:ok, pid} | {:error, any}
   def start_link() do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end

@@ -4,9 +4,11 @@
 [![API docs](https://img.shields.io/hexpm/v/lcd_display.svg?label=docs)](https://hexdocs.pm/lcd_display/LcdDisplay.html)
 ![CI](https://github.com/mnishiguchi/lcd_display/workflows/CI/badge.svg)
 
-`LcdDisplay` is a simple [Elixir](https://elixir-lang.org/) library that allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller).
+`LcdDisplay` allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) from [Elixir](https://elixir-lang.org/).
 
-See [documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) and [example apps](https://github.com/mnishiguchi/lcd_display/tree/main/examples) for more information.
+Here is the [documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) and [example apps](https://github.com/mnishiguchi/lcd_display/tree/main/examples) for this library.
+
+For more info on the display, please refer to [Hitachi HD44780 datasheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
 
 ## Installation
 
@@ -15,36 +17,51 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.13"}
+    {:lcd_display, "0.0.15"}
   ]
 end
 ```
 
-## Examples
+## Usage
 
-As an example, if you want to control a Hitachi HD44780 type display through
-[I²C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
-display driver. See the `LcdDisplay.Driver` documentation for supported display commands.
+As an example, if you want to control a [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) type display through
+[I2C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
+display driver.
+
+### Detectconnected devices
+
+Before connecting to an I2C device, please [detect connected devices](https://github.com/elixir-circuits/circuits_i2c#how-do-i-debug).
 
 ```elixir
-# Detect connected devices.
-Circuits.I2C.detect_devices()
+iex> Circuits.I2C.detect_devices()
+Circuits.I2C.detect_devices
+Devices on I2C bus "i2c-1":
+ * 64  (0x40)
+ * 112 (0x70)
 
-# Start the LCD driver and get a PID.
-pid =
-  LcdDisplay.start_display(
-    LcdDisplay.HD44780.I2C,      # A display driver module
-    %{
-        display_name: "display 1", # the identifier
-        i2c_bus: "i2c-1",          # I2C bus name
-        i2c_address: 0x27,         # 7-bit address
-        rows: 2,                   # the number of display rows
-        cols: 16,                  # the number of display columns
-        font_size: "5x8"           # "5x10" or "5x8"
-    }
-  )
+2 devices detected on 1 I2C buses
+```
 
-# Run commands.
+### Start an LCD driver and get a PID.
+
+```elixir
+driver_module = LcdDisplay.HD44780.I2C
+driver_config = %{
+  display_name: "display 1", # the identifier
+  i2c_bus: "i2c-1",          # I2C bus name
+  i2c_address: 0x27,         # 7-bit address
+  rows: 2,                   # the number of display rows
+  cols: 16,                  # the number of display columns
+  font_size: "5x8"           # "5x10" or "5x8"
+}
+pid = LcdDisplay.start_display(driver_module, driver_config)
+```
+
+### Run commands
+
+Please refer to the `LcdDisplay.Driver` documentation for supported display commands.
+
+```elixir
 LcdDisplay.execute(pid, {:print, "Hello world"})
 LcdDisplay.execute(pid, :clear)
 ```
