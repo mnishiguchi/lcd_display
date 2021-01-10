@@ -1,6 +1,5 @@
 defmodule LcdDisplay.HD44780.GPIOTest do
   use ExUnit.Case, async: true
-  doctest LcdDisplay.HD44780.GPIO
 
   # https://hexdocs.pm/mox/Mox.html
   import Mox

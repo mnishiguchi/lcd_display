@@ -1,7 +1,7 @@
-defmodule LcdDisplay.HD44780.PCF8575 do
+defmodule LcdDisplay.HD44780.MCP23008 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display through the 16-bit I/O expander
-  [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf).
+  Knows how to commuticate with HD44780 type display through the 8-Bit I/O Expander with Serial Interface
+  [MCP23008](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf).
   You can turn on/off one backlight LED.
 
   ## Usage
@@ -9,7 +9,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   ```
   iex(2)>  Circuits.I2C.detect_devices
   Devices on I2C bus "i2c-1":
-  * 39  (0x27)
+  * 32  (0x20)
 
   1 devices detected on 1 I2C buses
   ```
@@ -18,41 +18,41 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   config = %{
     display_name: "display 1", # the identifier
     i2c_bus: "i2c-1",          # I2C bus name
-    i2c_address: 0x27,         # 7-bit address
+    i2c_address: 0x20,         # 7-bit address
     rows: 2,                   # the number of display rows
     cols: 16,                  # the number of display columns
     font_size: "5x8"           # "5x10" or "5x8"
   }
 
   # Start the LCD driver and get the initial display state.
-  {:ok, display} = LcdDisplay.HD44780.PCF8575.start(config)
+  {:ok, display} = LcdDisplay.HD44780.MCP23008.start(config)
 
   # Run a command and the display state will be updated.
-  {:ok, display} = LcdDisplay.HD44780.PCF8575.execute(display, {:print, "Hello world"})
+  {:ok, display} = LcdDisplay.HD44780.MCP23008.execute(display, {:print, "Hello world"})
   ```
 
-  ## PCF8575
+  ## MCP23008
 
   ### pin assignment
 
   This module assumes the following pin assignment:
 
-  | PCF8575 | HD44780              |
-  | ------- | -------------------- |
-  | P0      | RS (Register Select) |
-  | P1      | -                    |
-  | P2      | E (Enable)           |
-  | P3      | LED                  |
-  | P4      | DB4 (Data Bus 4)     |
-  | P5      | DB5 (Data Bus 5)     |
-  | P6      | DB6 (Data Bus 6)     |
-  | P7      | DB7 (Data Bus 7)     |
+  | MCP23008 | HD44780              |
+  | -------  | -------------------- |
+  | GP0      | -                    |
+  | GP1      | RS (Register Select) |
+  | GP2      | E (Enable)           |
+  | GP3      | DB4 (Data Bus 4)     |
+  | GP4      | DB5 (Data Bus 5)     |
+  | GP5      | DB6 (Data Bus 6)     |
+  | GP6      | DB7 (Data Bus 7)     |
+  | GP7      | LED                  |
 
   ### Data byte
 
   | 7   | 6   | 5   | 4   | 3   | 2   | 1   | 0   |
   | --- | --- | --- | --- | --- | --- | --- | --- |
-  | DB7 | DB6 | DB5 | DB4 | LED | E   | -   | RS  |
+  | LED | DB7 | DB6 | DB5 | DB4 | E   | RS  | -   |
   """
 
   use Bitwise
@@ -91,15 +91,26 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @shift_display 0x08
   @shift_right 0x04
 
-  @default_i2c_address 0x27
+  @default_i2c_address 0x20
   @default_rows 2
   @default_cols 16
 
-  # PCF8575
   @rs_instruction 0x00
-  @rs_data 0x01
+  @rs_data 0x02
   @enable_bit 0x04
-  @backlight_on 0x08
+  @backlight_on 0x80
+
+  # MCP23008
+  @mcp23008_iodir 0x00
+  # @mcp23008_ipol 0x01
+  # @mcp23008_gpinten 0x02
+  # @mcp23008_defval 0x03
+  # @mcp23008_intcon 0x04
+  # @mcp23008_iocon 0x05
+  # @mcp23008_gppu 0x06
+  # @mcp23008_intf 0x07
+  # @mcp23008_intcap 0x08
+  @mcp23008_gpio 0x09
 
   @typedoc """
   The configuration options.
@@ -131,13 +142,18 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @spec initial_state(config()) :: LcdDisplay.Driver.t() | no_return()
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
+    i2c_address = opts[:i2c_address] || @default_i2c_address
+
     {:ok, i2c_ref} = SerialBus.open(i2c_bus)
+
+    # Make all the pins be outputs. Please refer to MCP23008 data sheet 1.6.1.
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
 
     %{
       driver_module: __MODULE__,
       display_name: opts[:display_name] || i2c_bus,
       i2c_ref: i2c_ref,
-      i2c_address: opts[:i2c_address] || @default_i2c_address,
+      i2c_address: i2c_address,
       rows: opts[:rows] || @default_rows,
       cols: opts[:cols] || @default_cols,
 
@@ -344,7 +360,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte()) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, four_bits, rs_bit \\ 0)
        when is_integer(four_bits) and four_bits in 0..15 and is_integer(rs_bit) do
-    byte = four_bits <<< 4 ||| rs_bit
+    byte = four_bits <<< 3 ||| rs_bit
 
     display
     |> expander_write(byte)
@@ -363,10 +379,10 @@ defmodule LcdDisplay.HD44780.PCF8575 do
        when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
     data =
       if backlight,
-        do: <<byte ||| @backlight_on>>,
-        else: <<byte>>
+        do: <<@mcp23008_gpio, byte ||| @backlight_on>>,
+        else: <<@mcp23008_gpio, byte>>
 
-    # <<data_body>> = data
+    # <<_, data_body>> = dataAdd HD44780_MCP23008
     # Logger.info("[#{__MODULE__}.expander_write] #{data_body |> Integer.to_string(2) |> String.pad_leading(8, "0")}")
 
     :ok = SerialBus.write(i2c_ref, i2c_address, data)

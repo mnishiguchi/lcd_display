@@ -1,6 +1,5 @@
 defmodule LcdDisplay.HD44780.PCF8575Test do
   use ExUnit.Case, async: true
-  doctest LcdDisplay.HD44780.PCF8575
 
   # https://hexdocs.pm/mox/Mox.html
   import Mox

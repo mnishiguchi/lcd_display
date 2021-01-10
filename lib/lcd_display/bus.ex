@@ -34,6 +34,8 @@ defmodule LcdDisplay.I2C do
   A thin wrapper of [elixir-circuits/circuits_i2c](https://github.com/elixir-circuits/circuits_i2c).
   """
 
+  require Logger
+
   defmodule Behaviour do
     @moduledoc """
     Defines a behaviour required for I2C abstraction.
@@ -41,7 +43,7 @@ defmodule LcdDisplay.I2C do
 
     @type i2c_bus :: String.t()
     @type i2c_address :: byte()
-    @type data :: byte()
+    @type data :: binary()
 
     @callback open(i2c_bus) :: {:ok, reference} | {:error, any}
     @callback write(reference, i2c_address, data) :: :ok | {:error, any}
@@ -51,7 +53,10 @@ defmodule LcdDisplay.I2C do
 
   def open(i2c_bus), do: i2c_module().open(i2c_bus)
 
-  def write(i2c_ref, i2c_address, data), do: i2c_module().write(i2c_ref, i2c_address, data)
+  def write(i2c_ref, i2c_address, data) do
+    # Logger.info("Writing #{inspect(data, base: :hex)} to #{inspect(i2c_address, base: :hex)}")
+    i2c_module().write(i2c_ref, i2c_address, data)
+  end
 
   defp i2c_module() do
     # https://hexdocs.pm/elixir/master/library-guidelines.html#avoid-compile-time-application-configuration
