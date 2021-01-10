@@ -25,7 +25,7 @@ defmodule LcdDisplay.DisplaySupervisor do
   ## Examples
 
       pid = DisplaySupervisor.display_controller(
-        LcdDisplay.HD44780.I2C,
+        LcdDisplay.HD44780.PCF8575,
         %{
           display_name: "display 1", # the identifier
           i2c_bus: "i2c-1",          # I2C bus name

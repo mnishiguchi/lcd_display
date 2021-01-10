@@ -1,7 +1,20 @@
-defmodule LcdDisplay.HD44780.I2C do
+defmodule LcdDisplay.HD44780.PCF8575 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display via I2C.
+  Knows how to commuticate with HD44780 type display through the 16-bit I/O expander [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf).
   You can turn on/off one backlight LED.
+
+  This module assumes the following pin assignment:
+
+  | PCF8575 | HD44780              |
+  | ------- | -------------------- |
+  | P0      | RS (Register Select) |
+  | P1      | RW (Read/Write)      |
+  | P2      | E (Enable)           |
+  | P3      | -                    |
+  | P4      | DB4 (Data Bus 4)     |
+  | P5      | DB5 (Data Bus 5)     |
+  | P6      | DB6 (Data Bus 6)     |
+  | P7      | DB7 (Data Bus 7)     |
 
   ## Examples
 
@@ -17,10 +30,10 @@ defmodule LcdDisplay.HD44780.I2C do
       }
 
       # Start the LCD driver and get the initial display state.
-      {:ok, display} = HD44780.I2C.start(config)
+      {:ok, display} = HD44780.PCF8575.start(config)
 
       # Run a command and the display state will be updated.
-      {:ok, display} = HD44780.I2C.execute(display, {:print, "Hello world"})
+      {:ok, display} = HD44780.PCF8575.execute(display, {:print, "Hello world"})
   """
 
   use Bitwise

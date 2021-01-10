@@ -25,7 +25,7 @@ end
 ## Usage
 
 As an example, if you want to control a [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) type display through
-[I2C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.I2C` module as a
+[I2C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.PCF8575` module as a
 display driver.
 
 ### Detectconnected devices
@@ -45,7 +45,7 @@ Devices on I2C bus "i2c-1":
 ### Start an LCD driver and get a PID
 
 ```elixir
-driver_module = LcdDisplay.HD44780.I2C
+driver_module = LcdDisplay.HD44780.PCF8575
 driver_config = %{
   display_name: "display 1", # the identifier
   i2c_bus: "i2c-1",          # I2C bus name

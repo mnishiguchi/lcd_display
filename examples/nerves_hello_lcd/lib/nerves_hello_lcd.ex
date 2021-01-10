@@ -10,7 +10,7 @@ defmodule NervesHelloLcd do
   import Logger
 
   def hello_i2c() do
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780.I2C, %{display_name: "display 1"})
+    pid = LcdDisplay.start_display(LcdDisplay.HD44780.PCF8575, %{display_name: "display 1"})
     qa_steps(pid)
     pid
   end
