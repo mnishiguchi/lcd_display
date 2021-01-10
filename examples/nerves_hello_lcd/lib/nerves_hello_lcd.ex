@@ -6,53 +6,50 @@ defmodule NervesHelloLcd do
 
       NervesHelloLcd.hello_pcf8575
       NervesHelloLcd.hello_mcp23008
+      NervesHelloLcd.hello_mcp23017
       NervesHelloLcd.hello_gpio
   """
 
-  def hello_pcf8575(opts \\ []) do
-    Circuits.I2C.detect_devices
-    config = %{
-      display_name: :rand.uniform(0xff),
-      i2c_bus: "i2c-1",
-      i2c_address: opts[:i2c_address] || 0x27,
-      rows: opts[:rows] || 2,
-      cols: opts[:cols] || 16
-    }
-    IO.inspect(config)
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780.PCF8575, config)
+  def hello_pcf8575(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.PCF8575, opts)
+
+  def hello_mcp23008(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.MCP23008, opts)
+
+  def hello_mcp23017(opts \\ []) do
+    pid = hello_i2c(LcdDisplay.HD44780.MCP23017, opts)
+
+    0..5
+    |> Enum.each(fn _ ->
+      LcdDisplay.execute(pid, :random_color)
+      Process.sleep(500)
+    end)
+  end
+
+  def hello_i2c(driver_module, opts \\ []) do
+    Circuits.I2C.detect_devices()
+    config = opts |> Enum.into(%{display_name: :rand.uniform(0xFF)}) |> IO.inspect()
+
+    pid = LcdDisplay.start_display(driver_module, config)
     qa_steps(pid)
     pid
   end
 
-  def hello_mcp23008(opts \\ []) do
-    Circuits.I2C.detect_devices
-    config = %{
-      display_name: :rand.uniform(0xff),
-      i2c_bus: "i2c-1",
-      i2c_address: opts[:i2c_address] || 0x20,
-      rows: opts[:rows] || 2,
-      cols: opts[:cols] || 16
-    }
-    IO.inspect(config)
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780.MCP23008, config)
-    qa_steps(pid)
-    pid
-  end
+  def hello_gpio(opts \\ []) do
+    config =
+      opts
+      |> Enum.into(%{
+        display_name: :rand.uniform(0xFF),
+        pin_rs: 5,
+        pin_rw: 6,
+        pin_en: 13,
+        pin_d4: 23,
+        pin_d5: 24,
+        pin_d6: 25,
+        pin_d7: 26,
+        pin_led: 12
+      })
+      |> IO.inspect()
 
-  def hello_gpio() do
-    config = %{
-      display_name: "display 2",
-      pin_rs: 5,
-      pin_rw: 6,
-      pin_en: 13,
-      pin_d4: 23,
-      pin_d5: 24,
-      pin_d6: 25,
-      pin_d7: 26,
-      pin_led: 12
-    }
-
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780.GPIO, config)
+    pid = LcdDisplay.start_display(LcdDisplay.HD44780_GPIO, config)
     qa_steps(pid)
     pid
   end

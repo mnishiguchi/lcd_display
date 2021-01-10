@@ -2,7 +2,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @moduledoc """
   Knows how to commuticate with HD44780 type display through the 16-bit I/O expander
   [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf).
-  You can turn on/off one backlight LED.
+  You can turn on/off the backlight.
 
   ## Usage
 
@@ -47,12 +47,6 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   | P5      | DB5 (Data Bus 5)     |
   | P6      | DB6 (Data Bus 6)     |
   | P7      | DB7 (Data Bus 7)     |
-
-  ### Data byte
-
-  | 7   | 6   | 5   | 4   | 3   | 2   | 1   | 0   |
-  | --- | --- | --- | --- | --- | --- | --- | --- |
-  | DB7 | DB6 | DB5 | DB4 | LED | E   | -   | RS  |
   """
 
   use Bitwise
@@ -95,7 +89,6 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @default_rows 2
   @default_cols 16
 
-  # PCF8575
   @rs_instruction 0x00
   @rs_data 0x01
   @enable_bit 0x04
@@ -106,15 +99,15 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   """
   @type config :: %{
           optional(:rows) => String.t(),
-          optional(:cols) => pos_integer(),
-          optional(:font_size) => pos_integer()
+          optional(:cols) => pos_integer,
+          optional(:font_size) => pos_integer
         }
 
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
   @impl true
-  @spec start(config()) :: {:ok, LcdDisplay.Driver.t()} | {:error, any()}
+  @spec start(config) :: {:ok, LcdDisplay.Driver.t()} | {:error, any}
   def start(config) do
     number_of_lines = if config[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
     font_size = if config[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
@@ -128,7 +121,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     e -> {:error, e}
   end
 
-  @spec initial_state(config()) :: LcdDisplay.Driver.t() | no_return()
+  @spec initial_state(config) :: LcdDisplay.Driver.t() | no_return
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
     {:ok, i2c_ref} = SerialBus.open(i2c_bus)
@@ -149,7 +142,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
-  @spec initialize_display(LcdDisplay.Driver.t(), list()) :: LcdDisplay.Driver.t() | no_return()
+  @spec initialize_display(LcdDisplay.Driver.t(), list) :: LcdDisplay.Driver.t() | no_return
   defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
@@ -185,7 +178,6 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     {:ok, display}
   end
 
-  # Write a string.
   def execute(display, {:print, string}) when is_binary(string) do
     # Translates a string to a charlist (list of bytes).
     string |> to_charlist() |> Enum.each(&write_data(display, &1))
@@ -236,9 +228,6 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     {:ok, enable_entry_mode_flag(display, @entry_left)}
   end
 
-  def execute(display, {:backlight, false}), do: {:ok, set_backlight(display, false)}
-  def execute(display, {:backlight, true}), do: {:ok, set_backlight(display, true)}
-
   def execute(display, {:scroll, 0}), do: {:ok, display}
 
   # Scroll the entire display left
@@ -276,48 +265,51 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     {:ok, display}
   end
 
+  def execute(display, {:backlight, false}), do: {:ok, set_backlight(display, false)}
+  def execute(display, {:backlight, true}), do: {:ok, set_backlight(display, true)}
+
   def execute(_display, command), do: {:error, {:unsupported, command}}
+
+  ##
+  ## Private utilities
+  ##
 
   defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 
   defp home(display), do: display |> write_instruction(@cmd_return_home) |> delay(2)
 
-  ##
-  ## Low level data pushing commands
-  ##
-
   # Set the DDRAM address corresponding to the specified cursor position.
-  @spec set_cursor(LcdDisplay.Driver.t(), pos_integer(), pos_integer()) :: LcdDisplay.Driver.t()
+  @spec set_cursor(LcdDisplay.Driver.t(), pos_integer, pos_integer) :: LcdDisplay.Driver.t()
   defp set_cursor(display, row, col) when row >= 0 and col >= 0 do
     ddram_address = determine_ddram_address({row, col}, Map.take(display, [:rows, :cols]))
     write_instruction(display, @cmd_set_ddram_address ||| ddram_address)
   end
 
-  @spec set_backlight(LcdDisplay.Driver.t(), boolean()) :: LcdDisplay.Driver.t()
+  @spec set_backlight(LcdDisplay.Driver.t(), boolean) :: LcdDisplay.Driver.t()
   defp set_backlight(display, flag) when is_boolean(flag) do
     # Set backlight and write 0 (nothing) to trigger it.
     %{display | backlight: flag} |> expander_write(0)
   end
 
-  @spec disable_entry_mode_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec disable_entry_mode_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp disable_entry_mode_flag(display, flag) do
     entry_mode = display.entry_mode &&& ~~~flag
     %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
   end
 
-  @spec enable_entry_mode_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec enable_entry_mode_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp enable_entry_mode_flag(display, flag) do
     entry_mode = display.entry_mode ||| flag
     %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
   end
 
-  @spec disable_display_control_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec disable_display_control_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp disable_display_control_flag(display, flag) do
     display_control = display.display_control &&& ~~~flag
     %{display | display_control: display_control} |> write_feature(:display_control)
   end
 
-  @spec enable_display_control_flag(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec enable_display_control_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp enable_display_control_flag(display, flag) do
     display_control = display.display_control ||| flag
     %{display | display_control: display_control} |> write_feature(:display_control)
@@ -329,10 +321,19 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     display |> write_instruction(Map.fetch!(display, feature_key))
   end
 
+  @spec delay(LcdDisplay.Driver.t(), pos_integer) :: LcdDisplay.Driver.t()
+  defp delay(display, milliseconds) do
+    with :ok <- Process.sleep(milliseconds), do: display
+  end
+
+  ##
+  ## Low level data pushing commands
+  ##
+
   defp write_instruction(display, byte), do: write_byte(display, byte, @rs_instruction)
   defp write_data(display, byte), do: write_byte(display, byte, @rs_data)
 
-  @spec write_byte(LcdDisplay.Driver.t(), byte(), byte()) :: LcdDisplay.Driver.t()
+  @spec write_byte(LcdDisplay.Driver.t(), byte, byte) :: LcdDisplay.Driver.t()
   defp write_byte(display, byte, rs_bit) when is_integer(byte) and is_integer(rs_bit) do
     <<high_four_bits::4, low_four_bits::4>> = <<byte>>
 
@@ -341,7 +342,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     |> write_four_bits(low_four_bits, rs_bit)
   end
 
-  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte()) :: LcdDisplay.Driver.t()
+  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, four_bits, rs_bit \\ 0)
        when is_integer(four_bits) and four_bits in 0..15 and is_integer(rs_bit) do
     byte = four_bits <<< 4 ||| rs_bit
@@ -351,14 +352,14 @@ defmodule LcdDisplay.HD44780.PCF8575 do
     |> pulse_enable(byte)
   end
 
-  @spec pulse_enable(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec pulse_enable(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp pulse_enable(display, byte) do
     display
     |> expander_write(byte ||| @enable_bit)
     |> expander_write(byte &&& ~~~@enable_bit)
   end
 
-  @spec expander_write(LcdDisplay.Driver.t(), byte()) :: LcdDisplay.Driver.t()
+  @spec expander_write(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
   defp expander_write(%{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight} = display, byte)
        when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
     data =
@@ -371,10 +372,5 @@ defmodule LcdDisplay.HD44780.PCF8575 do
 
     :ok = SerialBus.write(i2c_ref, i2c_address, data)
     display
-  end
-
-  @spec delay(LcdDisplay.Driver.t(), pos_integer()) :: LcdDisplay.Driver.t()
-  defp delay(display, milliseconds) do
-    with :ok <- Process.sleep(milliseconds), do: display
   end
 end

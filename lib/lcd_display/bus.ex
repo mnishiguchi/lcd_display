@@ -42,8 +42,8 @@ defmodule LcdDisplay.I2C do
     """
 
     @type i2c_bus :: String.t()
-    @type i2c_address :: byte()
-    @type data :: binary()
+    @type i2c_address :: byte
+    @type data :: binary
 
     @callback open(i2c_bus) :: {:ok, reference} | {:error, any}
     @callback write(reference, i2c_address, data) :: :ok | {:error, any}

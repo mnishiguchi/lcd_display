@@ -3,7 +3,7 @@ defmodule LcdDisplay.DriverUtil do
   A collection of utility functions that are used for display drivers.
   """
 
-  @type row_col_pos :: {non_neg_integer(), non_neg_integer()}
+  @type row_col_pos :: {non_neg_integer, non_neg_integer}
 
   @typedoc """
   Typically 2x16 or 4x20.
@@ -76,5 +76,29 @@ defmodule LcdDisplay.DriverUtil do
       0x00 + num_cols,
       0x40 + num_cols
     }
+  end
+
+  @doc """
+  Reverse four bits, for example converting "0011" to "1100".
+
+  ## Examples
+
+      # 0001 -> 1000
+      iex> LcdDisplay.DriverUtil.reverse_four_bits(1)
+      8
+
+      # 0010 -> 0100
+      iex> LcdDisplay.DriverUtil.reverse_four_bits(2)
+      4
+
+      # 0011 -> 1100
+      iex> LcdDisplay.DriverUtil.reverse_four_bits(3)
+      12
+  """
+  @spec reverse_four_bits(0..15) :: 0..15
+  def reverse_four_bits(four_bits) when is_integer(four_bits) and four_bits in 0..15 do
+    <<d4::1, d3::1, d2::1, d1::1>> = <<four_bits::4>>
+    <<reversed::4>> = <<d1::1, d2::1, d3::1, d4::1>>
+    reversed
   end
 end

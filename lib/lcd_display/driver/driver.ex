@@ -10,14 +10,14 @@ defmodule LcdDisplay.Driver do
   Type that represents the display state.
   """
   @type t :: %{
-          required(:driver_module) => atom(),
-          required(:display_name) => any(),
-          required(:rows) => num_rows(),
-          required(:cols) => num_cols(),
-          required(:entry_mode) => byte(),
-          required(:display_control) => byte(),
-          required(:backlight) => boolean(),
-          atom() => any()
+          required(:driver_module) => atom,
+          required(:display_name) => any,
+          required(:rows) => num_rows,
+          required(:cols) => num_cols,
+          required(:entry_mode) => byte,
+          required(:display_control) => byte,
+          required(:backlight) => boolean,
+          atom => any
         }
 
   @typedoc """
@@ -49,18 +49,18 @@ defmodule LcdDisplay.Driver do
           :clear
           | :home
           | {:print, String.t()}
-          | {:set_cursor, integer(), integer()}
-          | {:cursor, boolean()}
-          | {:blink, boolean()}
-          | {:display, boolean()}
-          | {:autoscroll, boolean()}
-          | {:backlight, boolean()}
+          | {:set_cursor, integer, integer}
+          | {:cursor, boolean}
+          | {:blink, boolean}
+          | {:display, boolean}
+          | {:autoscroll, boolean}
+          | {:backlight, boolean}
           | {:text_direction, :right_to_left}
           | {:text_direction, :left_to_right}
-          | {:scroll, integer()}
-          | {:left, integer()}
-          | {:right, integer()}
-          | {:char, integer(), byte()}
+          | {:scroll, integer}
+          | {:left, integer}
+          | {:right, integer}
+          | {:char, integer, byte}
 
   @type config :: map()
 

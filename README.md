@@ -58,6 +58,7 @@ LcdDisplay.execute(pid, :clear)
 
 ## Links
 
-- [Hitachi HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
+- [HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
 - [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
 - [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)
+- [MCP23017 data sheet](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf)

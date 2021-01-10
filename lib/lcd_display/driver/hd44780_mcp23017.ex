@@ -1,8 +1,8 @@
-defmodule LcdDisplay.HD44780.MCP23008 do
+defmodule LcdDisplay.HD44780.MCP23017 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display through the 8-Bit I/O Expander with Serial Interface
-  [MCP23008](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf).
-  You can turn on/off the backlight.
+  Knows how to commuticate with HD44780 type display through the 16-Bit I/O Expander with Serial Interface
+  [MCP23017](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf).
+  You can turn on/off the backlight and change the LED color by switching on/off red, green and blue.
 
   ## Usage
 
@@ -25,28 +25,49 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   }
 
   # Start the LCD driver and get the initial display state.
-  {:ok, display} = LcdDisplay.HD44780.MCP23008.start(config)
+  {:ok, display} = LcdDisplay.HD44780.MCP23017.start(config)
 
   # Run a command and the display state will be updated.
-  {:ok, display} = LcdDisplay.HD44780.MCP23008.execute(display, {:print, "Hello world"})
+  {:ok, display} = LcdDisplay.HD44780.MCP23017.execute(display, {:print, "Hello world"})
+
+  # Turn on/off `:red`, `:green` and `:blue` to change the backlight color.
+  {:ok, display} = LcdDisplay.HD44780.MCP23017.execute(display, {:red, false})
+
+  # Pick a random backlight color.
+  {:ok, display} = LcdDisplay.HD44780.MCP23017.execute(display, :random_color)
   ```
 
-  ## MCP23008
+  ## MCP23017
 
   ### pin assignment
 
   This module assumes the following pin assignment:
 
-  | MCP23008 | HD44780              |
+  #### GPIOA
+
+  | MCP23017 | HD44780              |
   | -------  | -------------------- |
-  | GP0      | -                    |
-  | GP1      | RS (Register Select) |
-  | GP2      | E (Enable)           |
-  | GP3      | DB4 (Data Bus 4)     |
-  | GP4      | DB5 (Data Bus 5)     |
-  | GP5      | DB6 (Data Bus 6)     |
-  | GP6      | DB7 (Data Bus 7)     |
-  | GP7      | LED                  |
+  | GPA0     | -                    |
+  | GPA1     | -                    |
+  | GPA2     | -                    |
+  | GPA3     | -                    |
+  | GPA4     | -                    |
+  | GPA5     | -                    |
+  | GPA6     | LED RED              |
+  | GPA7     | LED GREEN            |
+
+  #### GPIOB
+
+  | MCP23017 | HD44780              |
+  | -------  | -------------------- |
+  | GPB0     | LED BLUE             |
+  | GPB1     | DB7 (Data Bus 7)     |
+  | GPB2     | DB6 (Data Bus 6)     |
+  | GPB3     | DB5 (Data Bus 5)     |
+  | GPB4     | DB4 (Data Bus 4)     |
+  | GPB5     | E (Enable)           |
+  | GPB6     | -                    |
+  | GPB7     | RS (Register Select) |
   """
 
   use Bitwise
@@ -90,13 +111,17 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   @default_cols 16
 
   @rs_instruction 0x00
-  @rs_data 0x02
-  @enable_bit 0x04
-  @backlight_on 0x80
+  @rs_data 0x80
+  @enable_bit 0x20
+  @backlight_r 0x40
+  @backlight_g 0x80
+  @backlight_b 0x01
 
-  # MCP23008 registers
-  @mcp23008_iodir 0x00
-  @mcp23008_gpio 0x09
+  # MCP23017 registers
+  @mcp23017_iodir_a 0x00
+  @mcp23017_iodir_b 0x01
+  @mcp23017_gpio_a 0x12
+  @mcp23017_gpio_b 0x13
 
   @typedoc """
   The configuration options.
@@ -107,11 +132,13 @@ defmodule LcdDisplay.HD44780.MCP23008 do
           optional(:font_size) => pos_integer
         }
 
+  @type rgb_key :: :red | :green | :blue
+
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
   @impl true
-  @spec start(config) :: {:ok, LcdDisplay.Driver.t()} | {:error, any()}
+  @spec start(config) :: {:ok, LcdDisplay.Driver.t()} | {:error, any}
   def start(config) do
     number_of_lines = if config[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
     font_size = if config[:font_size] == "5x10", do: @font_size_5x10, else: @font_size_5x8
@@ -119,21 +146,22 @@ defmodule LcdDisplay.HD44780.MCP23008 do
     {:ok,
      config
      |> initial_state()
-     |> expander_write(@backlight_on)
+     |> expander_write(@backlight_b)
      |> initialize_display(function_set: @cmd_function_set ||| font_size ||| number_of_lines)}
   rescue
     e -> {:error, e}
   end
 
-  @spec initial_state(config) :: LcdDisplay.Driver.t() | no_return()
+  @spec initial_state(config) :: LcdDisplay.Driver.t() | no_return
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
     i2c_address = opts[:i2c_address] || @default_i2c_address
 
     {:ok, i2c_ref} = SerialBus.open(i2c_bus)
 
-    # Make all the pins be outputs. Please refer to MCP23008 data sheet 1.6.1.
-    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
+    # Make all the pins be outputs. Please refer to MCP23017 data sheet 3.5.
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_a, 0x00>>)
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_b, 0x00>>)
 
     %{
       driver_module: __MODULE__,
@@ -146,12 +174,17 @@ defmodule LcdDisplay.HD44780.MCP23008 do
       # Initial values for features that we can change later.
       entry_mode: @cmd_entry_mode_set ||| @entry_left,
       display_control: @cmd_display_control ||| @display_on,
-      backlight: true
+      # Switch on/off the backlight
+      backlight: true,
+      # Configure the backlight color by combining red, green and blue.
+      red: true,
+      green: true,
+      blue: true
     }
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
-  @spec initialize_display(LcdDisplay.Driver.t(), list) :: LcdDisplay.Driver.t() | no_return()
+  @spec initialize_display(LcdDisplay.Driver.t(), list) :: LcdDisplay.Driver.t() | no_return
   defp initialize_display(display, function_set: function_set) do
     display
     # Function set (8-bit mode; Interface is 8 bits long)
@@ -274,8 +307,11 @@ defmodule LcdDisplay.HD44780.MCP23008 do
     {:ok, display}
   end
 
-  def execute(display, {:backlight, false}), do: {:ok, set_backlight(display, false)}
-  def execute(display, {:backlight, true}), do: {:ok, set_backlight(display, true)}
+  def execute(display, {:backlight, on_off_bool}), do: {:ok, set_backlight(display, on_off_bool)}
+  def execute(display, {:red, on_off_bool}), do: {:ok, set_led_color(display, :red, on_off_bool)}
+  def execute(display, {:green, on_off_bool}), do: {:ok, set_led_color(display, :green, on_off_bool)}
+  def execute(display, {:blue, on_off_bool}), do: {:ok, set_led_color(display, :blue, on_off_bool)}
+  def execute(display, :random_color), do: {:ok, set_random_color(display)}
 
   def execute(_display, command), do: {:error, {:unsupported, command}}
 
@@ -297,7 +333,53 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   @spec set_backlight(LcdDisplay.Driver.t(), boolean) :: LcdDisplay.Driver.t()
   defp set_backlight(display, flag) when is_boolean(flag) do
     # Set backlight and write 0 (nothing) to trigger it.
-    %{display | backlight: flag} |> expander_write(0)
+    %{display | backlight: flag}
+    |> adjust_backlight_config()
+    |> expander_write(0)
+  end
+
+  @spec set_led_color(LcdDisplay.Driver.t(), rgb_key, boolean) :: LcdDisplay.Driver.t()
+  defp set_led_color(display, rgb_key, on_off_bool) do
+    display
+    |> Map.put(rgb_key, on_off_bool)
+    |> adjust_backlight_config()
+    |> expander_write(0)
+  end
+
+  @spec set_random_color(LcdDisplay.Driver.t()) :: LcdDisplay.Driver.t()
+  def set_random_color(display) do
+    display
+    |> shuffle_color()
+    |> adjust_backlight_config()
+    |> expander_write(0)
+  end
+
+  @spec adjust_backlight_config(LcdDisplay.Driver.t()) :: LcdDisplay.Driver.t()
+  defp adjust_backlight_config(%{backlight: backlight, red: red, green: green, blue: blue} = display) do
+    display
+    |> Map.merge(
+      # Step 1: Default to the white LED when no color is specified.
+      if(!red && !green && !blue, do: %{red: true, green: true, blue: true}, else: %{})
+    )
+    |> Map.merge(
+      # Step 2: Turn off all colors when the backlight is turned off.
+      if(backlight, do: %{}, else: %{red: false, green: false, blue: false})
+    )
+  end
+
+  @spec shuffle_color(LcdDisplay.Driver.t()) :: LcdDisplay.Driver.t()
+  defp shuffle_color(display) do
+    display
+    |> Map.merge(
+      ~w(red green blue)a
+      |> Enum.zip(
+        [[true, false, false], [true, true, false]]
+        |> Enum.shuffle()
+        |> Enum.at(0)
+        |> Enum.shuffle()
+      )
+      |> Enum.into(%{})
+    )
   end
 
   @spec disable_entry_mode_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
@@ -354,7 +436,9 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, four_bits, rs_bit \\ 0)
        when is_integer(four_bits) and four_bits in 0..15 and is_integer(rs_bit) do
-    byte = four_bits <<< 3 ||| rs_bit
+    <<d7::1, d6::1, d5::1, d4::1>> = <<four_bits::4>>
+    <<reversed_four_bits::4>> = <<d4::1, d5::1, d6::1, d7::1>>
+    byte = reversed_four_bits <<< 1 ||| rs_bit
 
     display
     |> expander_write(byte)
@@ -369,17 +453,47 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   end
 
   @spec expander_write(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
-  defp expander_write(%{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight} = display, byte)
-       when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
-    data =
-      if backlight,
-        do: <<@mcp23008_gpio, byte ||| @backlight_on>>,
-        else: <<@mcp23008_gpio, byte>>
+  defp expander_write(display, data_byte) do
+    display
+    |> expander_write_gpio_a()
+    |> expander_write_gpio_b(data_byte)
+  end
 
-    # <<_, data_body>> = data
-    # Logger.info("[#{__MODULE__}.expander_write] #{data_body |> Integer.to_string(2) |> String.pad_leading(8, "0")}")
+  # G R x x x x x x
+  defp expander_write_gpio_a(display) do
+    %{i2c_ref: i2c_ref, i2c_address: i2c_address} = display
+    %{backlight: backlight, red: r, green: g} = display
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, data)
+    binary_gpio_a =
+      cond do
+        # The backlight RGB Flags turn off the LEDs.
+        !backlight -> <<@mcp23017_gpio_a, @backlight_r ||| @backlight_g>>
+        !r && !g -> <<@mcp23017_gpio_a, @backlight_r ||| @backlight_g>>
+        !r -> <<@mcp23017_gpio_a, @backlight_r>>
+        !g -> <<@mcp23017_gpio_a, @backlight_g>>
+        true -> <<@mcp23017_gpio_a, 0x00>>
+      end
+
+    :ok = SerialBus.write(i2c_ref, i2c_address, binary_gpio_a)
+
+    display
+  end
+
+  # Rs x E D4 D5 D6 D7 B
+  defp expander_write_gpio_b(display, data_byte) do
+    %{i2c_ref: i2c_ref, i2c_address: i2c_address} = display
+    %{backlight: backlight, blue: b} = display
+
+    binary_gpio_b =
+      cond do
+        # The backlight RGB Flags turn off the LEDs.
+        !backlight -> <<@mcp23017_gpio_b, data_byte ||| @backlight_b>>
+        !b -> <<@mcp23017_gpio_b, data_byte ||| @backlight_b>>
+        true -> <<@mcp23017_gpio_b, data_byte>>
+      end
+
+    :ok = SerialBus.write(i2c_ref, i2c_address, binary_gpio_b)
+
     display
   end
 end
