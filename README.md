@@ -8,7 +8,7 @@
 
 Here is the [documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) and [example apps](https://github.com/mnishiguchi/lcd_display/tree/main/examples) for this library.
 
-For more info on the display, please refer to [Hitachi HD44780 datasheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
+For more info on the display, please refer to [Hitachi HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
 
 ## Installation
 
@@ -17,7 +17,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.16"}
+    {:lcd_display, "0.0.17"}
   ]
 end
 ```
@@ -25,22 +25,8 @@ end
 ## Usage
 
 As an example, if you want to control a [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) type display through
-[I2C](https://en.wikipedia.org/wiki/I%C2%B2C), you can use `LcdDisplay.HD44780.PCF8575` module as a
-display driver.
-
-### Detectconnected devices
-
-Before connecting to an I2C device, please [detect connected devices](https://github.com/elixir-circuits/circuits_i2c#how-do-i-debug).
-
-```elixir
-iex> Circuits.I2C.detect_devices()
-Circuits.I2C.detect_devices
-Devices on I2C bus "i2c-1":
- * 64  (0x40)
- * 112 (0x70)
-
-2 devices detected on 1 I2C buses
-```
+the 16-bit I/O expander [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf),
+you can use `LcdDisplay.HD44780.PCF8575` module as a display driver.
 
 ### Start an LCD driver and get a PID
 
@@ -72,4 +58,6 @@ LcdDisplay.execute(pid, :clear)
 
 ## Links
 
-- [Hitachi HD44780 datasheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
+- [Hitachi HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
+- [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
+- [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)

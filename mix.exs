@@ -1,7 +1,7 @@
 defmodule LcdDisplay.MixProject do
   use Mix.Project
 
-  @version "0.0.16"
+  @version "0.0.17"
   @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
@@ -63,7 +63,10 @@ defmodule LcdDisplay.MixProject do
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
-        "Hitachi HD44780 datasheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf"
+        "Hitachi HD44780 data sheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf",
+        "PCF8575 data sheet" => "https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf",
+        "MCP23008 data sheet" =>
+          "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf"
       }
     }
   end

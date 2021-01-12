@@ -4,13 +4,37 @@ defmodule NervesHelloLcd do
 
   ## Examples
 
-      NervesHelloLcd.hello_i2c
+      NervesHelloLcd.hello_pcf8575
+      NervesHelloLcd.hello_mcp23008
+      NervesHelloLcd.hello_gpio
   """
 
-  import Logger
+  def hello_pcf8575(opts \\ []) do
+    Circuits.I2C.detect_devices
+    config = %{
+      display_name: :rand.uniform(0xff),
+      i2c_bus: "i2c-1",
+      i2c_address: opts[:i2c_address] || 0x27,
+      rows: opts[:rows] || 2,
+      cols: opts[:cols] || 16
+    }
+    IO.inspect(config)
+    pid = LcdDisplay.start_display(LcdDisplay.HD44780.PCF8575, config)
+    qa_steps(pid)
+    pid
+  end
 
-  def hello_i2c() do
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780.PCF8575, %{display_name: "display 1"})
+  def hello_mcp23008(opts \\ []) do
+    Circuits.I2C.detect_devices
+    config = %{
+      display_name: :rand.uniform(0xff),
+      i2c_bus: "i2c-1",
+      i2c_address: opts[:i2c_address] || 0x20,
+      rows: opts[:rows] || 2,
+      cols: opts[:cols] || 16
+    }
+    IO.inspect(config)
+    pid = LcdDisplay.start_display(LcdDisplay.HD44780.MCP23008, config)
     qa_steps(pid)
     pid
   end
