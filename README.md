@@ -6,10 +6,6 @@
 
 `LcdDisplay` allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) from [Elixir](https://elixir-lang.org/).
 
-Here is the [documentation](https://hexdocs.pm/lcd_display/LcdDisplay.html) and [example apps](https://github.com/mnishiguchi/lcd_display/tree/main/examples) for this library.
-
-For more info on the display, please refer to [Hitachi HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
-
 ## Installation
 
 You can install `LcdDisplay` by adding `lcd_display` to your list of dependencies in `mix.exs`:
@@ -17,7 +13,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.17"}
+    {:lcd_display, "0.0.18"}
   ]
 end
 ```
@@ -51,6 +47,13 @@ Please refer to the `LcdDisplay.Driver` documentation for supported display comm
 LcdDisplay.execute(pid, {:print, "Hello world"})
 LcdDisplay.execute(pid, :clear)
 ```
+
+### Drivers
+
+- `LcdDisplay.HD44780.GPIO`
+- `LcdDisplay.HD44780.PCF8575`
+- `LcdDisplay.HD44780.MCP23008`
+- `LcdDisplay.HD44780.MCP23017`
 
 ## Thanks
 
