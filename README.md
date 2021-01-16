@@ -6,6 +6,8 @@
 
 `LcdDisplay` allows you to control a [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) like [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) from [Elixir](https://elixir-lang.org/).
 
+![nerves_hello_lcd_20201219_152639](https://user-images.githubusercontent.com/7563926/102699565-b5646700-4213-11eb-9ca1-a11bd10c619d.gif)
+
 ## Installation
 
 You can install `LcdDisplay` by adding `lcd_display` to your list of dependencies in `mix.exs`:
