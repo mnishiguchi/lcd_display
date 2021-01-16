@@ -94,6 +94,7 @@ defmodule LcdDisplay.Driver do
 
   @doc """
   Injects the common logic for an LCD driver.
+  For display flags, please refer to [HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
 
   ## Examples
 
