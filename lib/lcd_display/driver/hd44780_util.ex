@@ -1,4 +1,4 @@
-defmodule LcdDisplay.DriverUtil do
+defmodule LcdDisplay.HD44780.Util do
   @moduledoc """
   A collection of utility functions that are used for display drivers.
   """
@@ -9,8 +9,8 @@ defmodule LcdDisplay.DriverUtil do
   Typically 2x16 or 4x20.
   """
   @type display_config :: %{
-          required(:rows) => LcdDisplay.Driver.num_rows(),
-          required(:cols) => LcdDisplay.Driver.num_cols(),
+          required(:rows) => LcdDisplay.HD44780.Driver.num_rows(),
+          required(:cols) => LcdDisplay.HD44780.Driver.num_cols(),
           any => any
         }
 
@@ -20,16 +20,16 @@ defmodule LcdDisplay.DriverUtil do
 
   ## Examples
 
-      iex> LcdDisplay.DriverUtil.determine_ddram_address({0,0}, %{rows: 2, cols: 16})
+      iex> LcdDisplay.HD44780.Util.determine_ddram_address({0,0}, %{rows: 2, cols: 16})
       0
 
-      iex> LcdDisplay.DriverUtil.determine_ddram_address({0,15}, %{rows: 2, cols: 16})
+      iex> LcdDisplay.HD44780.Util.determine_ddram_address({0,15}, %{rows: 2, cols: 16})
       15
 
-      iex> LcdDisplay.DriverUtil.determine_ddram_address({1,0}, %{rows: 2, cols: 16})
+      iex> LcdDisplay.HD44780.Util.determine_ddram_address({1,0}, %{rows: 2, cols: 16})
       64
 
-      iex> LcdDisplay.DriverUtil.determine_ddram_address({1,15}, %{rows: 2, cols: 16})
+      iex> LcdDisplay.HD44780.Util.determine_ddram_address({1,15}, %{rows: 2, cols: 16})
       79
   """
   @spec determine_ddram_address(row_col_pos, display_config) :: non_neg_integer
@@ -59,16 +59,16 @@ defmodule LcdDisplay.DriverUtil do
 
   ## Examples
 
-      iex> LcdDisplay.DriverUtil.ddram_row_offsets(8)
+      iex> LcdDisplay.HD44780.Util.ddram_row_offsets(8)
       {0, 64, 8, 72}
 
-      iex> LcdDisplay.DriverUtil.ddram_row_offsets(16)
+      iex> LcdDisplay.HD44780.Util.ddram_row_offsets(16)
       {0, 64, 16, 80}
 
-      iex> LcdDisplay.DriverUtil.ddram_row_offsets(20)
+      iex> LcdDisplay.HD44780.Util.ddram_row_offsets(20)
       {0, 64, 20, 84}
   """
-  @spec ddram_row_offsets(LcdDisplay.Driver.num_cols()) :: {0, 64, pos_integer, pos_integer}
+  @spec ddram_row_offsets(LcdDisplay.HD44780.Driver.num_cols()) :: {0, 64, pos_integer, pos_integer}
   def ddram_row_offsets(num_cols) when is_number(num_cols) and num_cols >= 1 do
     {
       0x00,
@@ -84,15 +84,15 @@ defmodule LcdDisplay.DriverUtil do
   ## Examples
 
       # 0001 -> 1000
-      iex> LcdDisplay.DriverUtil.reverse_four_bits(1)
+      iex> LcdDisplay.HD44780.Util.reverse_four_bits(1)
       8
 
       # 0010 -> 0100
-      iex> LcdDisplay.DriverUtil.reverse_four_bits(2)
+      iex> LcdDisplay.HD44780.Util.reverse_four_bits(2)
       4
 
       # 0011 -> 1100
-      iex> LcdDisplay.DriverUtil.reverse_four_bits(3)
+      iex> LcdDisplay.HD44780.Util.reverse_four_bits(3)
       12
   """
   @spec reverse_four_bits(0..15) :: 0..15

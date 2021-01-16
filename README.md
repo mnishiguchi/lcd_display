@@ -13,7 +13,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.19"}
+    {:lcd_display, "0.0.20"}
   ]
 end
 ```
@@ -41,7 +41,7 @@ pid = LcdDisplay.start_display(driver_module, driver_config)
 
 ### Run commands
 
-Please refer to the `LcdDisplay.Driver` documentation for supported display commands.
+Please refer to the `LcdDisplay.HD44780.Driver` documentation for supported display commands.
 
 ```elixir
 LcdDisplay.execute(pid, {:print, "Hello world"})

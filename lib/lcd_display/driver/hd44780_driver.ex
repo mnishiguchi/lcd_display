@@ -1,5 +1,5 @@
 # credo:disable-for-this-file
-defmodule LcdDisplay.Driver do
+defmodule LcdDisplay.HD44780.Driver do
   @moduledoc """
   Defines a behaviour required for an LCD driver.
   """
@@ -98,16 +98,16 @@ defmodule LcdDisplay.Driver do
 
   ## Examples
 
-      use LcdDisplay.Driver
+      use LcdDisplay.HD44780.Driver
 
   """
   defmacro __using__(_) do
     quote do
       use Bitwise
 
-      import LcdDisplay.DriverUtil
+      import LcdDisplay.HD44780.Util
 
-      @behaviour LcdDisplay.Driver
+      @behaviour LcdDisplay.HD44780.Driver
 
       @default_rows 2
       @default_cols 16
@@ -142,7 +142,7 @@ defmodule LcdDisplay.Driver do
       @shift_display 0x08
       @shift_right 0x04
 
-      @spec delay(LcdDisplay.Driver.t(), pos_integer) :: LcdDisplay.Driver.t()
+      @spec delay(LcdDisplay.HD44780.Driver.t(), pos_integer) :: LcdDisplay.HD44780.Driver.t()
       defp delay(display, milliseconds) do
         :ok = Process.sleep(milliseconds)
         display
