@@ -122,12 +122,7 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
     i2c_address = opts[:i2c_address] || @default_i2c_address
-
-    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
-
-    # Make all the pins be outputs. Please refer to MCP23017 data sheet 3.5.
-    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_a, 0x00>>)
-    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_b, 0x00>>)
+    {:ok, i2c_ref} = initialize_serial_bus(i2c_bus, i2c_address)
 
     %{
       driver_module: __MODULE__,
@@ -147,6 +142,16 @@ defmodule LcdDisplay.HD44780.MCP23017 do
       green: true,
       blue: true
     }
+  end
+
+  @spec initialize_serial_bus(String.t(), byte) :: {:ok, reference} | no_return
+  defp initialize_serial_bus(i2c_bus, i2c_address) do
+    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
+
+    # Make all the pins be outputs. Please refer to MCP23017 data sheet 3.5.
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_a, 0x00>>)
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23017_iodir_b, 0x00>>)
+    {:ok, i2c_ref}
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.

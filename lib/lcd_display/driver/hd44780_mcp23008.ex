@@ -95,11 +95,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
     i2c_address = opts[:i2c_address] || @default_i2c_address
-
-    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
-
-    # Make all the pins be outputs. Please refer to MCP23008 data sheet 1.6.1.
-    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
+    {:ok, i2c_ref} = initialize_serial_bus(i2c_bus, i2c_address)
 
     %{
       driver_module: __MODULE__,
@@ -114,6 +110,15 @@ defmodule LcdDisplay.HD44780.MCP23008 do
       display_control: @cmd_display_control ||| @display_on,
       backlight: true
     }
+  end
+
+  @spec initialize_serial_bus(String.t(), byte) :: {:ok, reference} | no_return
+  defp initialize_serial_bus(i2c_bus, i2c_address) do
+    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
+
+    # Make all the pins be outputs. Please refer to MCP23008 data sheet 1.6.1.
+    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
+    {:ok, i2c_ref}
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.

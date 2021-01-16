@@ -90,13 +90,14 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   @spec initial_state(config) :: LcdDisplay.Driver.t() | no_return
   defp initial_state(opts) do
     i2c_bus = opts[:i2c_bus] || "i2c-1"
-    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
+    i2c_address = opts[:i2c_address] || @default_i2c_address
+    {:ok, i2c_ref} = initialize_serial_bus(i2c_bus, i2c_address)
 
     %{
       driver_module: __MODULE__,
       display_name: opts[:display_name] || i2c_bus,
       i2c_ref: i2c_ref,
-      i2c_address: opts[:i2c_address] || @default_i2c_address,
+      i2c_address: i2c_address,
       rows: opts[:rows] || @default_rows,
       cols: opts[:cols] || @default_cols,
 
@@ -105,6 +106,11 @@ defmodule LcdDisplay.HD44780.PCF8575 do
       display_control: @cmd_display_control ||| @display_on,
       backlight: true
     }
+  end
+
+  @spec initialize_serial_bus(String.t(), byte) :: {:ok, reference} | no_return
+  defp initialize_serial_bus(i2c_bus, _i2c_address) do
+    {:ok, _i2c_ref} = SerialBus.open(i2c_bus)
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
