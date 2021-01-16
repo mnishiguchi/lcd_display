@@ -70,45 +70,11 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   | GPB7     | RS (Register Select) |
   """
 
-  use Bitwise
-  require Logger
-  import LcdDisplay.DriverUtil
+  use LcdDisplay.Driver
+
   alias LcdDisplay.I2C, as: SerialBus
 
-  @behaviour LcdDisplay.Driver
-
-  # flags for function set
-  @font_size_5x10 0x04
-  @font_size_5x8 0x00
-  @number_of_lines_2 0x08
-  @number_of_lines_1 0x00
-
-  # commands
-  @cmd_clear_display 0x01
-  @cmd_return_home 0x02
-  @cmd_entry_mode_set 0x04
-  @cmd_display_control 0x08
-  @cmd_cursor_shift_control 0x10
-  @cmd_function_set 0x20
-  @cmd_set_cgram_address 0x40
-  @cmd_set_ddram_address 0x80
-
-  # flags for display entry mode
-  @entry_left 0x02
-  @autoscroll 0x01
-
-  # flags for display on/off control
-  @display_on 0x04
-  @cursor_on 0x02
-  @blink_on 0x01
-
-  # flags for display/cursor shift
-  @shift_display 0x08
-  @shift_right 0x04
-
   @default_i2c_address 0x20
-  @default_rows 2
-  @default_cols 16
 
   @rs_instruction 0x00
   @rs_data 0x80
@@ -137,7 +103,7 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   @doc """
   Initializes the LCD driver and returns the initial display state.
   """
-  @impl true
+  @impl LcdDisplay.Driver
   @spec start(config) :: {:ok, LcdDisplay.Driver.t()} | {:error, any}
   def start(config) do
     number_of_lines = if config[:rows] == 1, do: @number_of_lines_1, else: @number_of_lines_2
@@ -209,125 +175,107 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   @doc """
   Executes the specified command and returns a new display state.
   """
-  @impl true
-  def execute(display, :clear) do
-    clear(display)
-    {:ok, display}
-  end
-
-  def execute(display, :home) do
-    home(display)
-    {:ok, display}
-  end
-
-  def execute(display, {:print, string}) when is_binary(string) do
-    # Translates a string to a charlist (list of bytes).
-    string |> to_charlist() |> Enum.each(&write_data(display, &1))
-    {:ok, display}
-  end
-
-  def execute(display, {:set_cursor, row, col}) do
-    {:ok, set_cursor(display, row, col)}
-  end
-
-  def execute(display, {:cursor, false}) do
-    {:ok, disable_display_control_flag(display, @cursor_on)}
-  end
-
-  def execute(display, {:cursor, true}) do
-    {:ok, enable_display_control_flag(display, @cursor_on)}
-  end
-
-  def execute(display, {:blink, false}) do
-    {:ok, disable_display_control_flag(display, @blink_on)}
-  end
-
-  def execute(display, {:blink, true}) do
-    {:ok, enable_display_control_flag(display, @blink_on)}
-  end
-
-  def execute(display, {:display, false}) do
-    {:ok, disable_display_control_flag(display, @display_on)}
-  end
-
-  def execute(display, {:display, true}) do
-    {:ok, enable_display_control_flag(display, @display_on)}
-  end
-
-  def execute(display, {:autoscroll, false}) do
-    {:ok, disable_entry_mode_flag(display, @autoscroll)}
-  end
-
-  def execute(display, {:autoscroll, true}) do
-    {:ok, enable_entry_mode_flag(display, @autoscroll)}
-  end
-
-  def execute(display, {:text_direction, :right_to_left}) do
-    {:ok, disable_entry_mode_flag(display, @entry_left)}
-  end
-
-  def execute(display, {:text_direction, :left_to_right}) do
-    {:ok, enable_entry_mode_flag(display, @entry_left)}
-  end
-
-  def execute(display, {:scroll, 0}), do: {:ok, display}
-
-  # Scroll the entire display left
-  def execute(display, {:scroll, cols}) when cols < 0 do
-    write_instruction(display, @cmd_cursor_shift_control ||| @shift_display)
-    execute(display, {:scroll, cols + 1})
-  end
-
-  # Scroll the entire display right
-  def execute(display, {:scroll, cols}) when cols > 0 do
-    write_instruction(display, @cmd_cursor_shift_control ||| @shift_display ||| @shift_right)
-    execute(display, {:scroll, cols - 1})
-  end
-
-  # Move cursor right
-  def execute(display, {:right, 0}), do: {:ok, display}
-
-  def execute(display, {:right, cols}) do
-    write_instruction(display, @cmd_cursor_shift_control ||| @shift_right)
-    execute(display, {:right, cols - 1})
-  end
-
-  # Move cursor left
-  def execute(display, {:left, 0}), do: {:ok, display}
-
-  def execute(display, {:left, cols}) do
-    write_instruction(display, @cmd_cursor_shift_control)
-    execute(display, {:left, cols - 1})
-  end
-
-  # Program custom character to CGRAM. We only have 8 CGRAM locations.
-  def execute(display, {:char, index, bitmap}) when index in 0..7 and length(bitmap) === 8 do
-    write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
-    for line <- bitmap, do: write_data(display, line)
-    {:ok, display}
-  end
-
+  @impl LcdDisplay.Driver
+  def execute(display, :clear), do: {:ok, clear(display)}
+  def execute(display, :home), do: {:ok, home(display)}
+  def execute(display, {:print, text}), do: {:ok, print(display, text)}
+  def execute(display, {:set_cursor, row, col}), do: {:ok, set_cursor(display, row, col)}
+  def execute(display, {:cursor, on_off_bool}), do: {:ok, set_display_control_flag(display, @cursor_on, on_off_bool)}
+  def execute(display, {:blink, on_off_bool}), do: {:ok, set_display_control_flag(display, @blink_on, on_off_bool)}
+  def execute(display, {:display, on_off_bool}), do: {:ok, set_display_control_flag(display, @display_on, on_off_bool)}
+  def execute(display, {:autoscroll, on_off_bool}), do: {:ok, set_entry_mode_flag(display, @autoscroll, on_off_bool)}
+  def execute(display, {:text_direction, :right_to_left}), do: {:ok, set_entry_mode_flag(display, @entry_left, false)}
+  def execute(display, {:text_direction, :left_to_right}), do: {:ok, set_entry_mode_flag(display, @entry_left, true)}
+  def execute(display, {:scroll, cols}), do: {:ok, scroll(display, cols)}
+  def execute(display, {:right, cols}), do: {:ok, right(display, cols)}
+  def execute(display, {:left, cols}), do: {:ok, left(display, cols)}
+  def execute(display, {:char, index, bitmap}), do: {:ok, char(display, index, bitmap)}
   def execute(display, {:backlight, on_off_bool}), do: {:ok, set_backlight(display, on_off_bool)}
   def execute(display, {:red, on_off_bool}), do: {:ok, set_led_color(display, :red, on_off_bool)}
   def execute(display, {:green, on_off_bool}), do: {:ok, set_led_color(display, :green, on_off_bool)}
   def execute(display, {:blue, on_off_bool}), do: {:ok, set_led_color(display, :blue, on_off_bool)}
   def execute(display, :random_color), do: {:ok, set_random_color(display)}
-
   def execute(_display, command), do: {:error, {:unsupported, command}}
-
-  ##
-  ## Private utilities
-  ##
 
   defp clear(display), do: display |> write_instruction(@cmd_clear_display) |> delay(2)
 
   defp home(display), do: display |> write_instruction(@cmd_return_home) |> delay(2)
+
+  defp print(display, text) when is_binary(text) do
+    # Translates a text to a charlist (list of bytes).
+    text |> to_charlist() |> Enum.each(&write_data(display, &1))
+    display
+  end
 
   # Set the DDRAM address corresponding to the specified cursor position.
   @spec set_cursor(LcdDisplay.Driver.t(), pos_integer, pos_integer) :: LcdDisplay.Driver.t()
   defp set_cursor(display, row, col) when row >= 0 and col >= 0 do
     ddram_address = determine_ddram_address({row, col}, Map.take(display, [:rows, :cols]))
     write_instruction(display, @cmd_set_ddram_address ||| ddram_address)
+  end
+
+  @spec set_entry_mode_flag(LcdDisplay.Driver.t(), byte, boolean) :: LcdDisplay.Driver.t()
+  defp set_entry_mode_flag(display, flag, on_off_bool) do
+    entry_mode =
+      if on_off_bool,
+        do: display.entry_mode ||| flag,
+        else: display.entry_mode &&& ~~~flag
+
+    write_feature(%{display | entry_mode: entry_mode}, :entry_mode)
+  end
+
+  @spec set_display_control_flag(LcdDisplay.Driver.t(), byte, boolean) :: LcdDisplay.Driver.t()
+  defp set_display_control_flag(display, flag, on_off_bool) do
+    display_control =
+      if on_off_bool,
+        do: display.display_control ||| flag,
+        else: display.display_control &&& ~~~flag
+
+    write_feature(%{display | display_control: display_control}, :display_control)
+  end
+
+  # Write a feature based on the display state.
+  @spec write_feature(LcdDisplay.Driver.t(), LcdDisplay.Driver.feature()) :: LcdDisplay.Driver.t()
+  defp write_feature(display, feature_key) when is_atom(feature_key) do
+    write_instruction(display, Map.fetch!(display, feature_key))
+  end
+
+  defp scroll(display, 0), do: display
+
+  # Scroll the entire display left
+  defp scroll(display, cols) when cols < 0 do
+    write_instruction(display, @cmd_cursor_shift_control ||| @shift_display)
+    scroll(display, cols + 1)
+  end
+
+  # Scroll the entire display right
+  defp scroll(display, cols) when cols > 0 do
+    write_instruction(display, @cmd_cursor_shift_control ||| @shift_display ||| @shift_right)
+    scroll(display, cols - 1)
+  end
+
+  # Move cursor right
+  defp right(display, 0), do: display
+
+  defp right(display, cols) do
+    write_instruction(display, @cmd_cursor_shift_control ||| @shift_right)
+    right(display, cols - 1)
+  end
+
+  # Move cursor left
+  defp left(display, 0), do: display
+
+  defp left(display, cols) do
+    write_instruction(display, @cmd_cursor_shift_control)
+    left(display, cols - 1)
+  end
+
+  # Program custom character to CGRAM. We only have 8 CGRAM locations.
+  @spec char(LcdDisplay.Driver.t(), 0..7, list(byte)) :: LcdDisplay.Driver.t()
+  def char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
+    write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
+    for line <- bitmap, do: write_data(display, line)
+    display
   end
 
   @spec set_backlight(LcdDisplay.Driver.t(), boolean) :: LcdDisplay.Driver.t()
@@ -382,47 +330,11 @@ defmodule LcdDisplay.HD44780.MCP23017 do
     )
   end
 
-  @spec disable_entry_mode_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
-  defp disable_entry_mode_flag(display, flag) do
-    entry_mode = display.entry_mode &&& ~~~flag
-    %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
-  end
+  @impl LcdDisplay.Driver
+  def write_instruction(display, byte), do: write_byte(display, byte, @rs_instruction)
 
-  @spec enable_entry_mode_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
-  defp enable_entry_mode_flag(display, flag) do
-    entry_mode = display.entry_mode ||| flag
-    %{display | entry_mode: entry_mode} |> write_feature(:entry_mode)
-  end
-
-  @spec disable_display_control_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
-  defp disable_display_control_flag(display, flag) do
-    display_control = display.display_control &&& ~~~flag
-    %{display | display_control: display_control} |> write_feature(:display_control)
-  end
-
-  @spec enable_display_control_flag(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
-  defp enable_display_control_flag(display, flag) do
-    display_control = display.display_control ||| flag
-    %{display | display_control: display_control} |> write_feature(:display_control)
-  end
-
-  # Write a feature based on the display state.
-  @spec write_feature(LcdDisplay.Driver.t(), LcdDisplay.Driver.feature()) :: LcdDisplay.Driver.t()
-  defp write_feature(display, feature_key) when is_atom(feature_key) do
-    display |> write_instruction(Map.fetch!(display, feature_key))
-  end
-
-  @spec delay(LcdDisplay.Driver.t(), pos_integer) :: LcdDisplay.Driver.t()
-  defp delay(display, milliseconds) do
-    with :ok <- Process.sleep(milliseconds), do: display
-  end
-
-  ##
-  ## Low level data pushing commands
-  ##
-
-  defp write_instruction(display, byte), do: write_byte(display, byte, @rs_instruction)
-  defp write_data(display, byte), do: write_byte(display, byte, @rs_data)
+  @impl LcdDisplay.Driver
+  def write_data(display, byte), do: write_byte(display, byte, @rs_data)
 
   @spec write_byte(LcdDisplay.Driver.t(), byte, byte) :: LcdDisplay.Driver.t()
   defp write_byte(display, byte, rs_bit) when is_integer(byte) and is_integer(rs_bit) do

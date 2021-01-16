@@ -82,7 +82,6 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       assert {:ok, %{}} = HD44780.GPIO.execute(d, :clear)
       assert {:ok, %{}} = HD44780.GPIO.execute(d, :home)
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:print, "Hello"})
-      assert {:ok, %{}} = HD44780.GPIO.execute(d, {:write, 'H'})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:set_cursor, 2, 2})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, false})
       assert {:ok, %{}} = HD44780.GPIO.execute(d, {:cursor, true})

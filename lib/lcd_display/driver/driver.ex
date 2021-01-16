@@ -1,3 +1,4 @@
+# credo:disable-for-this-file
 defmodule LcdDisplay.Driver do
   @moduledoc """
   Defines a behaviour required for an LCD driver.
@@ -27,6 +28,7 @@ defmodule LcdDisplay.Driver do
 
   @typedoc """
   Type that represents a supported display command.
+  Some driver modules do not the backlight LED commands simply due to lack of enough pins.
 
   | Supported Command      | Description                                                   |
   | ---------------------- | ------------------------------------------------------------- |
@@ -38,12 +40,15 @@ defmodule LcdDisplay.Driver do
   | `:display`             | Switch on/off the display without losing what is on it.       |
   | `:blink`               | Switch on/off the block cursor.                               |
   | `:autoscroll`          | Make existing text shift when new text is printed.            |
-  | `:backlight`           | Switch on/off the backlight.                                  |
   | `:text_direction`      | Make text flow left/right from the cursor.                    |
   | `:scroll`              | Scroll text left and right.                                   |
   | `:left`                | Move the cursor left.                                         |
   | `:right`               | Move the cursor right.                                        |
   | `:char`                | Program custom character to CGRAM.                            |
+  | `:backlight`           | Switch on/off the backlight.                                  |
+  | `:red`                 | Switch on/off the red LED.                                    |
+  | `:green`               | Switch on/off the green LED.                                  |
+  | `:blue`                | Switch on/off the blue LED.                                   |
   """
   @type command ::
           :clear
@@ -54,13 +59,16 @@ defmodule LcdDisplay.Driver do
           | {:blink, boolean}
           | {:display, boolean}
           | {:autoscroll, boolean}
-          | {:backlight, boolean}
           | {:text_direction, :right_to_left}
           | {:text_direction, :left_to_right}
           | {:scroll, integer}
           | {:left, integer}
           | {:right, integer}
           | {:char, integer, byte}
+          | {:backlight, boolean}
+          | {:red, boolean}
+          | {:green, boolean}
+          | {:blue, boolean}
 
   @type config :: map()
 
@@ -73,4 +81,71 @@ defmodule LcdDisplay.Driver do
   Executes the specified command and returns a new display state.
   """
   @callback execute(t, command) :: {:ok, t} | {:error, any}
+
+  @doc """
+  Sends an instruction byte to the display.
+  """
+  @callback write_instruction(t, byte) :: t
+
+  @doc """
+  Sends a data byte to the display.
+  """
+  @callback write_data(t, byte) :: t
+
+  @doc """
+  Injects the common logic for an LCD driver.
+
+  ## Examples
+
+      use LcdDisplay.Driver
+
+  """
+  defmacro __using__(_) do
+    quote do
+      use Bitwise
+
+      import LcdDisplay.DriverUtil
+
+      @behaviour LcdDisplay.Driver
+
+      @default_rows 2
+      @default_cols 16
+
+      # flags for function set
+      @mode_4bit 0x01
+      @font_size_5x8 0x00
+      @font_size_5x10 0x04
+      @number_of_lines_1 0x00
+      @number_of_lines_2 0x08
+
+      # commands
+      @cmd_clear_display 0x01
+      @cmd_return_home 0x02
+      @cmd_entry_mode_set 0x04
+      @cmd_display_control 0x08
+      @cmd_cursor_shift_control 0x10
+      @cmd_function_set 0x20
+      @cmd_set_cgram_address 0x40
+      @cmd_set_ddram_address 0x80
+
+      # flags for display entry mode
+      @entry_left 0x02
+      @autoscroll 0x01
+
+      # flags for display on/off control
+      @display_on 0x04
+      @cursor_on 0x02
+      @blink_on 0x01
+
+      # flags for display/cursor shift
+      @shift_display 0x08
+      @shift_right 0x04
+
+      @spec delay(LcdDisplay.Driver.t(), pos_integer) :: LcdDisplay.Driver.t()
+      defp delay(display, milliseconds) do
+        :ok = Process.sleep(milliseconds)
+        display
+      end
+    end
+  end
 end
