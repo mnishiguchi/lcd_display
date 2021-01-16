@@ -75,9 +75,6 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   alias LcdDisplay.I2C, as: SerialBus
 
   @default_i2c_address 0x20
-
-  @rs_instruction 0x00
-  @rs_data 0x80
   @enable_bit 0x20
   @backlight_r 0x40
   @backlight_g 0x80
@@ -336,10 +333,10 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   end
 
   @impl LcdDisplay.Driver
-  def write_instruction(display, byte), do: write_byte(display, byte, @rs_instruction)
+  def write_instruction(display, byte), do: write_byte(display, byte, 0)
 
   @impl LcdDisplay.Driver
-  def write_data(display, byte), do: write_byte(display, byte, @rs_data)
+  def write_data(display, byte), do: write_byte(display, byte, 1)
 
   @spec write_byte(LcdDisplay.Driver.t(), byte, byte) :: LcdDisplay.Driver.t()
   defp write_byte(display, byte, rs_bit) when is_integer(byte) and is_integer(rs_bit) do
@@ -350,16 +347,16 @@ defmodule LcdDisplay.HD44780.MCP23017 do
     |> write_four_bits(low_four_bits, rs_bit)
   end
 
-  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte) :: LcdDisplay.Driver.t()
+  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, 0..1) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, four_bits, rs_bit \\ 0)
-       when is_integer(four_bits) and four_bits in 0..15 and is_integer(rs_bit) do
+       when is_integer(four_bits) and four_bits in 0..15 and rs_bit in 0..1 do
+    # Map the four bits to the data pins.
     <<d7::1, d6::1, d5::1, d4::1>> = <<four_bits::4>>
-    <<reversed_four_bits::4>> = <<d4::1, d5::1, d6::1, d7::1>>
-    byte = reversed_four_bits <<< 1 ||| rs_bit
+    <<data_byte>> = <<rs_bit::1, 0::2, d4::1, d5::1, d6::1, d7::1, 0::1>>
 
     display
-    |> expander_write(byte)
-    |> pulse_enable(byte)
+    |> expander_write(data_byte)
+    |> pulse_enable(data_byte)
   end
 
   @spec pulse_enable(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
@@ -378,39 +375,35 @@ defmodule LcdDisplay.HD44780.MCP23017 do
 
   # G R x x x x x x
   defp expander_write_gpio_a(display) do
-    %{i2c_ref: i2c_ref, i2c_address: i2c_address} = display
-    %{backlight: backlight, red: r, green: g} = display
+    %{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight, red: r, green: g} = display
 
     binary_gpio_a =
       cond do
         # The backlight RGB Flags turn off the LEDs.
-        !backlight -> <<@mcp23017_gpio_a, @backlight_r ||| @backlight_g>>
-        !r && !g -> <<@mcp23017_gpio_a, @backlight_r ||| @backlight_g>>
-        !r -> <<@mcp23017_gpio_a, @backlight_r>>
-        !g -> <<@mcp23017_gpio_a, @backlight_g>>
-        true -> <<@mcp23017_gpio_a, 0x00>>
+        !backlight -> @backlight_r ||| @backlight_g
+        !r && !g -> @backlight_r ||| @backlight_g
+        !r -> @backlight_r
+        !g -> @backlight_g
+        true -> 0x00
       end
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, binary_gpio_a)
-
+    :ok = SerialBus.write(i2c_ref, i2c_address, [@mcp23017_gpio_a, binary_gpio_a])
     display
   end
 
   # Rs x E D4 D5 D6 D7 B
   defp expander_write_gpio_b(display, data_byte) do
-    %{i2c_ref: i2c_ref, i2c_address: i2c_address} = display
-    %{backlight: backlight, blue: b} = display
+    %{i2c_ref: i2c_ref, i2c_address: i2c_address, backlight: backlight, blue: b} = display
 
     binary_gpio_b =
       cond do
         # The backlight RGB Flags turn off the LEDs.
-        !backlight -> <<@mcp23017_gpio_b, data_byte ||| @backlight_b>>
-        !b -> <<@mcp23017_gpio_b, data_byte ||| @backlight_b>>
-        true -> <<@mcp23017_gpio_b, data_byte>>
+        !backlight -> data_byte ||| @backlight_b
+        !b -> data_byte ||| @backlight_b
+        true -> data_byte
       end
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, binary_gpio_b)
-
+    :ok = SerialBus.write(i2c_ref, i2c_address, [@mcp23017_gpio_b, binary_gpio_b])
     display
   end
 end

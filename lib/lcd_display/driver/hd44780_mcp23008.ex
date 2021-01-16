@@ -54,9 +54,6 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   alias LcdDisplay.I2C, as: SerialBus
 
   @default_i2c_address 0x20
-
-  @rs_instruction 0x00
-  @rs_data 0x02
   @enable_bit 0x04
   @backlight_on 0x80
 
@@ -253,13 +250,13 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   end
 
   @impl LcdDisplay.Driver
-  def write_instruction(display, byte), do: write_byte(display, byte, @rs_instruction)
+  def write_instruction(display, byte), do: write_byte(display, byte, 0)
 
   @impl LcdDisplay.Driver
-  def write_data(display, byte), do: write_byte(display, byte, @rs_data)
+  def write_data(display, byte), do: write_byte(display, byte, 1)
 
-  @spec write_byte(LcdDisplay.Driver.t(), byte, byte) :: LcdDisplay.Driver.t()
-  defp write_byte(display, byte, rs_bit) when is_integer(byte) and is_integer(rs_bit) do
+  @spec write_byte(LcdDisplay.Driver.t(), byte, 0..1) :: LcdDisplay.Driver.t()
+  defp write_byte(display, byte, rs_bit) when is_integer(byte) and rs_bit in 0..1 do
     <<high_four_bits::4, low_four_bits::4>> = <<byte>>
 
     display
@@ -267,14 +264,16 @@ defmodule LcdDisplay.HD44780.MCP23008 do
     |> write_four_bits(low_four_bits, rs_bit)
   end
 
-  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, byte) :: LcdDisplay.Driver.t()
+  @spec write_four_bits(LcdDisplay.Driver.t(), 0..15, 0..1) :: LcdDisplay.Driver.t()
   defp write_four_bits(display, four_bits, rs_bit \\ 0)
-       when is_integer(four_bits) and four_bits in 0..15 and is_integer(rs_bit) do
-    byte = four_bits <<< 3 ||| rs_bit
+       when is_integer(four_bits) and four_bits in 0..15 and rs_bit in 0..1 do
+    # Map the four bits to the data pins.
+    <<d7::1, d6::1, d5::1, d4::1>> = <<four_bits::4>>
+    <<data_byte>> = <<0::1, d7::1, d6::1, d5::1, d4::1, 0::1, rs_bit::1, 0::1>>
 
     display
-    |> expander_write(byte)
-    |> pulse_enable(byte)
+    |> expander_write(data_byte)
+    |> pulse_enable(data_byte)
   end
 
   @spec pulse_enable(LcdDisplay.Driver.t(), byte) :: LcdDisplay.Driver.t()
@@ -289,10 +288,10 @@ defmodule LcdDisplay.HD44780.MCP23008 do
        when is_reference(i2c_ref) and is_integer(i2c_address) and is_boolean(backlight) and is_integer(byte) do
     data =
       if backlight,
-        do: <<@mcp23008_gpio, byte ||| @backlight_on>>,
-        else: <<@mcp23008_gpio, byte>>
+        do: byte ||| @backlight_on,
+        else: byte
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, data)
+    :ok = SerialBus.write(i2c_ref, i2c_address, [@mcp23008_gpio, data])
     display
   end
 end
