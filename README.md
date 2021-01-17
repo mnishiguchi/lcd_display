@@ -15,7 +15,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.0.20"}
+    {:lcd_display, "0.0.21"}
   ]
 end
 ```
@@ -53,9 +53,10 @@ LcdDisplay.execute(pid, :clear)
 ### Drivers
 
 - `LcdDisplay.HD44780.GPIO`
-- `LcdDisplay.HD44780.PCF8575`
-- `LcdDisplay.HD44780.MCP23008`
-- `LcdDisplay.HD44780.MCP23017`
+- `LcdDisplay.HD44780.PCF8575` - I2C
+- `LcdDisplay.HD44780.MCP23008`  - I2C
+- `LcdDisplay.HD44780.MCP23017`  - I2C
+- `LcdDisplay.HD44780.SN74HC595` - SPI
 
 ## Thanks
 
@@ -67,3 +68,4 @@ LcdDisplay.execute(pid, :clear)
 - [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
 - [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)
 - [MCP23017 data sheet](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf)
+- [SN74HC595 data sheet](https://www.ti.com/lit/ds/scls041i/scls041i.pdf)

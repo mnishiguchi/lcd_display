@@ -5,4 +5,5 @@ import Config
 config :lcd_display,
   gpio_module: LcdDisplay.MockGPIO,
   i2c_module: LcdDisplay.MockI2C,
+  spi_module: LcdDisplay.MockSPI,
   display_driver: LcdDisplay.MockDriver

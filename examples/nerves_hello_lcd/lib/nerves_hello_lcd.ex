@@ -4,10 +4,11 @@ defmodule NervesHelloLcd do
 
   ## Examples
 
+      NervesHelloLcd.hello_gpio
       NervesHelloLcd.hello_pcf8575
       NervesHelloLcd.hello_mcp23008
       NervesHelloLcd.hello_mcp23017
-      NervesHelloLcd.hello_gpio
+      NervesHelloLcd.hello_sn74hc595
   """
 
   def hello_pcf8575(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.PCF8575, opts)
@@ -26,6 +27,16 @@ defmodule NervesHelloLcd do
 
   def hello_i2c(driver_module, opts \\ []) do
     Circuits.I2C.detect_devices()
+    config = opts |> Enum.into(%{display_name: :rand.uniform(0xFF)}) |> IO.inspect()
+
+    pid = LcdDisplay.start_display(driver_module, config)
+    qa_steps(pid)
+    pid
+  end
+
+  def hello_sn74hc595(opts \\ []), do: hello_spi(LcdDisplay.HD44780.SN74HC595, opts)
+
+  def hello_spi(driver_module, opts \\ []) do
     config = opts |> Enum.into(%{display_name: :rand.uniform(0xFF)}) |> IO.inspect()
 
     pid = LcdDisplay.start_display(driver_module, config)

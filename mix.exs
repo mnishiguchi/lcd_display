@@ -3,7 +3,7 @@ defmodule LcdDisplay.MixProject do
 
   use Mix.Project
 
-  @version "0.0.20"
+  @version "0.0.21"
   @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
@@ -37,6 +37,7 @@ defmodule LcdDisplay.MixProject do
     [
       {:circuits_gpio, "~> 0.4"},
       {:circuits_i2c, "~> 0.1"},
+      {:circuits_spi, "~> 0.1"},
       {:mox, "~> 1.0.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
@@ -65,11 +66,12 @@ defmodule LcdDisplay.MixProject do
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
-        "Hitachi HD44780 data sheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf",
+        "HD44780 data sheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf",
         "PCF8575 data sheet" => "https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf",
         "MCP23008 data sheet" =>
           "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf",
-        "MCP23017 data sheet" => "https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf"
+        "MCP23017 data sheet" => "https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf",
+        "SN74HC595 data sheet" => "https://www.ti.com/lit/ds/scls041i/scls041i.pdf"
       }
     }
   end
