@@ -28,7 +28,7 @@ defmodule LcdDisplay.HD44780.Driver do
 
   @typedoc """
   Type that represents a supported display command.
-  Some driver modules do not the backlight LED commands simply due to lack of enough pins.
+  Some driver modules do not support the backlight LED commands.
 
   | Supported Command      | Description                                                   |
   | ---------------------- | ------------------------------------------------------------- |

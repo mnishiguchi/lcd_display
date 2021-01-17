@@ -1,6 +1,6 @@
 defmodule LcdDisplay.I2C do
   @moduledoc """
-  Lets you communicate with hardware devices using the I2C protocol.
+  Lets you communicate with hardware devices using the [I2C](https://en.wikipedia.org/wiki/I%C2%B2C) protocol.
   A thin wrapper of [elixir-circuits/circuits_i2c](https://github.com/elixir-circuits/circuits_i2c).
   """
 
@@ -24,7 +24,7 @@ defmodule LcdDisplay.I2C do
   def open(i2c_bus), do: i2c_module().open(i2c_bus)
 
   def write(i2c_ref, i2c_address, data) do
-    # Logger.info("Writing #{inspect(data, base: :hex)} to #{inspect(i2c_address, base: :hex)}")
+    # Logger.info("[#{__MODULE__}] Writing #{inspect(data, base: :hex)}")
     i2c_module().write(i2c_ref, i2c_address, data)
   end
 

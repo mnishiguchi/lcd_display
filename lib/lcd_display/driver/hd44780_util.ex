@@ -79,26 +79,51 @@ defmodule LcdDisplay.HD44780.Util do
   end
 
   @doc """
-  Reverse four bits, for example converting "0011" to "1100".
+  Adjusts the backlight-related values in the display driver state.
 
   ## Examples
 
-      # 0001 -> 1000
-      iex> LcdDisplay.HD44780.Util.reverse_four_bits(1)
-      8
+        # Default to the white LED when no color is specified.
+        iex> LcdDisplay.HD44780.Util.adjust_backlight_config(%{backlight: true, red: false, green: false, blue: false})
+        %{backlight: true, blue: true, green: true, red: true}
 
-      # 0010 -> 0100
-      iex> LcdDisplay.HD44780.Util.reverse_four_bits(2)
-      4
+        # Turn off all colors when the backlight is turned off.
+        iex> LcdDisplay.HD44780.Util.adjust_backlight_config(%{backlight: false, red: true, green: true, blue: true})
+        %{backlight: false, blue: false, green: false, red: false}
 
-      # 0011 -> 1100
-      iex> LcdDisplay.HD44780.Util.reverse_four_bits(3)
-      12
+        # Else do nothing
+        iex> LcdDisplay.HD44780.Util.adjust_backlight_config(%{backlight: true, red: true, green: false, blue: false})
+        %{backlight: true, blue: false, green: false, red: true}
   """
-  @spec reverse_four_bits(0..15) :: 0..15
-  def reverse_four_bits(four_bits) when is_integer(four_bits) and four_bits in 0..15 do
-    <<d4::1, d3::1, d2::1, d1::1>> = <<four_bits::4>>
-    <<reversed::4>> = <<d1::1, d2::1, d3::1, d4::1>>
-    reversed
+  @spec adjust_backlight_config(map) :: map
+  def adjust_backlight_config(%{backlight: backlight, red: red, green: green, blue: blue} = display) do
+    display
+    |> Map.merge(
+      # Step 1: Default to the white LED when no color is specified.
+      if(!red && !green && !blue, do: %{red: true, green: true, blue: true}, else: %{})
+    )
+    |> Map.merge(
+      # Step 2: Turn off all colors when the backlight is turned off.
+      if(backlight, do: %{}, else: %{red: false, green: false, blue: false})
+    )
+  end
+
+  @doc """
+  Shuffles the RGB boolean values in the display driver state.
+  """
+  @spec shuffle_color(map) :: map
+  def shuffle_color(display) do
+    display
+    |> Map.merge(
+      ~w(red green blue)a
+      |> Enum.zip(
+        # Exclude white and none
+        [[true, false, false], [true, true, false]]
+        |> Enum.shuffle()
+        |> Enum.at(0)
+        |> Enum.shuffle()
+      )
+      |> Enum.into(%{})
+    )
   end
 end

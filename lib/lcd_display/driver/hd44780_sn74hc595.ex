@@ -1,6 +1,6 @@
 defmodule LcdDisplay.HD44780.SN74HC595 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display through the 8-Bit Shift Register
+  Knows how to commuticate with HD44780 type display through the 8-bit shift register
   [SN74HC595](https://www.ti.com/lit/ds/scls041i/scls041i.pdf).
   You can turn on/off the backlight.
 
@@ -27,9 +27,7 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
   {:ok, display} = LcdDisplay.HD44780.SN74HC595.execute(display, {:print, "Hello world"})
   ```
 
-  ## SN74HC595
-
-  ### pin assignment
+  ## Pin assignment
 
   This module assumes the following pin assignment:
 
@@ -46,8 +44,6 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
   """
 
   use LcdDisplay.HD44780.Driver
-
-  alias LcdDisplay.SPI, as: SPI
 
   @default_spi_bus "spidev0.0"
   @enable_bit 0x04
@@ -102,7 +98,7 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
 
   @spec initialize_serial_bus(String.t(), list) :: {:ok, reference} | no_return
   defp initialize_serial_bus(spi_bus, opts \\ []) do
-    {:ok, _spi_ref} = SPI.open(spi_bus, opts)
+    {:ok, _spi_ref} = LcdDisplay.SPI.open(spi_bus, opts)
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
@@ -225,7 +221,7 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
 
   # Program custom character to CGRAM. We only have 8 CGRAM locations.
   @spec char(display_driver, 0..7, list(byte)) :: display_driver
-  def char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
+  defp char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
     write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
     for line <- bitmap, do: write_data(display, line)
     display
@@ -278,7 +274,7 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
         do: byte ||| @backlight_on,
         else: byte
 
-    {:ok, _} = SPI.transfer(spi_ref, <<data>>)
+    {:ok, _} = LcdDisplay.SPI.transfer(spi_ref, <<data>>)
     display
   end
 end

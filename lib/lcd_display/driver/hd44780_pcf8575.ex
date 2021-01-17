@@ -31,9 +31,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   {:ok, display} = LcdDisplay.HD44780.PCF8575.execute(display, {:print, "Hello world"})
   ```
 
-  ## PCF8575
-
-  ### pin assignment
+  ## Pin assignment
 
   This module assumes the following pin assignment:
 
@@ -51,8 +49,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
 
   use LcdDisplay.HD44780.Driver
 
-  alias LcdDisplay.I2C, as: SerialBus
-
+  @default_i2c_bus "i2c-1"
   @default_i2c_address 0x27
   @enable_bit 0x04
   @backlight_on 0x08
@@ -88,7 +85,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
 
   @spec initial_state(config) :: display_driver | no_return
   defp initial_state(opts) do
-    i2c_bus = opts[:i2c_bus] || "i2c-1"
+    i2c_bus = opts[:i2c_bus] || @default_i2c_bus
     i2c_address = opts[:i2c_address] || @default_i2c_address
     {:ok, i2c_ref} = initialize_serial_bus(i2c_bus, i2c_address)
 
@@ -109,7 +106,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
 
   @spec initialize_serial_bus(String.t(), byte) :: {:ok, reference} | no_return
   defp initialize_serial_bus(i2c_bus, _i2c_address) do
-    {:ok, _i2c_ref} = SerialBus.open(i2c_bus)
+    {:ok, _i2c_ref} = LcdDisplay.I2C.open(i2c_bus)
   end
 
   # Initializes the display for 4-bit interface. See Hitachi HD44780 datasheet page 46 for details.
@@ -231,7 +228,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
 
   # Program custom character to CGRAM. We only have 8 CGRAM locations.
   @spec char(display_driver, 0..7, list(byte)) :: display_driver
-  def char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
+  defp char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
     write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
     for line <- bitmap, do: write_data(display, line)
     display
@@ -250,7 +247,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   def write_data(display, byte), do: write_byte(display, byte, 1)
 
   @spec write_byte(display_driver, byte, 0..1) :: display_driver
-  defp write_byte(display, byte, rs_bit) when is_integer(byte) and rs_bit in 0..1 do
+  defp write_byte(display, byte, rs_bit) when byte in 0..255 and rs_bit in 0..1 do
     <<high_four_bits::4, low_four_bits::4>> = <<byte>>
 
     display
@@ -286,7 +283,7 @@ defmodule LcdDisplay.HD44780.PCF8575 do
         do: byte ||| @backlight_on,
         else: byte
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, [data])
+    :ok = LcdDisplay.I2C.write(i2c_ref, i2c_address, [data])
     display
   end
 end

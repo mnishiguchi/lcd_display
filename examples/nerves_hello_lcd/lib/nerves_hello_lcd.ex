@@ -27,8 +27,7 @@ defmodule NervesHelloLcd do
 
   def hello_i2c(driver_module, opts \\ []) do
     Circuits.I2C.detect_devices()
-    config = opts |> Enum.into(%{display_name: :rand.uniform(0xFF)}) |> IO.inspect()
-
+    config = opts |> Enum.into(%{}) |> IO.inspect()
     pid = LcdDisplay.start_display(driver_module, config)
     qa_steps(pid)
     pid
@@ -37,8 +36,7 @@ defmodule NervesHelloLcd do
   def hello_sn74hc595(opts \\ []), do: hello_spi(LcdDisplay.HD44780.SN74HC595, opts)
 
   def hello_spi(driver_module, opts \\ []) do
-    config = opts |> Enum.into(%{display_name: :rand.uniform(0xFF)}) |> IO.inspect()
-
+    config = opts |> Enum.into(%{}) |> IO.inspect()
     pid = LcdDisplay.start_display(driver_module, config)
     qa_steps(pid)
     pid

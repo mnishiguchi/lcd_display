@@ -1,6 +1,6 @@
 defmodule LcdDisplay.HD44780.MCP23008 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display through the 8-Bit I/O Expander with Serial Interface
+  Knows how to commuticate with HD44780 type display through the 8-bit I/O expander
   [MCP23008](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf).
   You can turn on/off the backlight.
 
@@ -31,9 +31,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   {:ok, display} = LcdDisplay.HD44780.MCP23008.execute(display, {:print, "Hello world"})
   ```
 
-  ## MCP23008
-
-  ### pin assignment
+  ## Pin assignment
 
   This module assumes the following pin assignment:
 
@@ -51,8 +49,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
 
   use LcdDisplay.HD44780.Driver
 
-  alias LcdDisplay.I2C, as: SerialBus
-
+  @default_i2c_bus "i2c-1"
   @default_i2c_address 0x20
   @enable_bit 0x04
   @backlight_on 0x80
@@ -91,7 +88,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
 
   @spec initial_state(config) :: display_driver | no_return()
   defp initial_state(opts) do
-    i2c_bus = opts[:i2c_bus] || "i2c-1"
+    i2c_bus = opts[:i2c_bus] || @default_i2c_bus
     i2c_address = opts[:i2c_address] || @default_i2c_address
     {:ok, i2c_ref} = initialize_serial_bus(i2c_bus, i2c_address)
 
@@ -112,10 +109,10 @@ defmodule LcdDisplay.HD44780.MCP23008 do
 
   @spec initialize_serial_bus(String.t(), byte) :: {:ok, reference} | no_return
   defp initialize_serial_bus(i2c_bus, i2c_address) do
-    {:ok, i2c_ref} = SerialBus.open(i2c_bus)
+    {:ok, i2c_ref} = LcdDisplay.I2C.open(i2c_bus)
 
     # Make all the pins be outputs. Please refer to MCP23008 data sheet 1.6.1.
-    :ok = SerialBus.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
+    :ok = LcdDisplay.I2C.write(i2c_ref, i2c_address, <<@mcp23008_iodir, 0x00>>)
     {:ok, i2c_ref}
   end
 
@@ -239,7 +236,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
 
   # Program custom character to CGRAM. We only have 8 CGRAM locations.
   @spec char(display_driver, 0..7, list(byte)) :: display_driver
-  def char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
+  defp char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
     write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
     for line <- bitmap, do: write_data(display, line)
     display
@@ -258,7 +255,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
   def write_data(display, byte), do: write_byte(display, byte, 1)
 
   @spec write_byte(display_driver, byte, 0..1) :: display_driver
-  defp write_byte(display, byte, rs_bit) when is_integer(byte) and rs_bit in 0..1 do
+  defp write_byte(display, byte, rs_bit) when byte in 0..255 and rs_bit in 0..1 do
     <<high_four_bits::4, low_four_bits::4>> = <<byte>>
 
     display
@@ -293,7 +290,7 @@ defmodule LcdDisplay.HD44780.MCP23008 do
         do: byte ||| @backlight_on,
         else: byte
 
-    :ok = SerialBus.write(i2c_ref, i2c_address, [@mcp23008_gpio, data])
+    :ok = LcdDisplay.I2C.write(i2c_ref, i2c_address, [@mcp23008_gpio, data])
     display
   end
 end

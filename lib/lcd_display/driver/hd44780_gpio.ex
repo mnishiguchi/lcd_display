@@ -77,7 +77,7 @@ defmodule LcdDisplay.HD44780.GPIO do
      |> set_backlight(true)
      |> initialize_display(function_set: @cmd_function_set ||| @mode_4bit ||| font_size ||| number_of_lines)}
   rescue
-    e -> {:error, e.message || "Error starting #{__MODULE__}"}
+    e -> {:error, e}
   end
 
   @spec initial_state(config) :: display_driver | no_return

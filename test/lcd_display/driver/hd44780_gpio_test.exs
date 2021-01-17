@@ -62,14 +62,13 @@ defmodule LcdDisplay.HD44780.GPIOTest do
   describe "required config keys" do
     test "start with missing required keys" do
       c = default_config()
-      error_tuple = {:error, "Error starting Elixir.LcdDisplay.HD44780.GPIO"}
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:display_name]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_rs]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_en]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d4]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d5]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d6]))
-      assert error_tuple == HD44780.GPIO.start(Map.drop(c, [:pin_d7]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:display_name]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_rs]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_en]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_d4]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_d5]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_d6]))
+      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_d7]))
     end
   end
 

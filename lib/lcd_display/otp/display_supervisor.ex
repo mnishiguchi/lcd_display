@@ -37,7 +37,9 @@ defmodule LcdDisplay.DisplaySupervisor do
       )
   """
   def display_controller(driver_module, config) when is_atom(driver_module) and is_map(config) do
-    case DisplayController.whereis({driver_module, config.display_name}) do
+    display_name = config[:display_name] || "Display #{:rand.uniform(999)}"
+
+    case DisplayController.whereis({driver_module, display_name}) do
       nil ->
         start_child(driver_module, config)
 
@@ -58,6 +60,6 @@ defmodule LcdDisplay.DisplaySupervisor do
   end
 
   defp initialize_display(driver_module, config) when is_atom(driver_module) and is_map(config) do
-    with {:ok, display} <- apply(driver_module, :start, [config]), do: display
+    with {:ok, display} <- driver_module.start(config), do: display
   end
 end

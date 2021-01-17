@@ -6,6 +6,8 @@ defmodule LcdDisplay.DisplayController do
   use GenServer
   require Logger
 
+  @type display_driver :: LcdDisplay.HD44780.Driver.t()
+
   def child_spec(%{display_name: display_name} = initial_display) do
     %{
       id: {__MODULE__, display_name},
@@ -32,7 +34,7 @@ defmodule LcdDisplay.DisplayController do
   Starts a display driver process and registers the process with a composite key
   of driver module and display name.
   """
-  @spec start_link(LcdDisplay.HD44780.Driver.t()) :: {:ok, pid} | {:error, any}
+  @spec start_link(display_driver) :: {:ok, pid} | {:error, any}
   def start_link(%{driver_module: driver_module, display_name: display_name} = initial_display) do
     GenServer.start_link(__MODULE__, initial_display, name: via_tuple({driver_module, display_name}))
   end
@@ -56,9 +58,8 @@ defmodule LcdDisplay.DisplayController do
     {:reply, result, Map.merge(display, new_display)}
   end
 
-  @spec control_display(LcdDisplay.HD44780.Driver.command(), LcdDisplay.HD44780.Driver.t()) ::
-          {:ok, LcdDisplay.HD44780.Driver.t()} | {:error, any}
+  @spec control_display(LcdDisplay.HD44780.Driver.command(), display_driver) :: {:ok, display_driver} | {:error, any}
   defp control_display(command, %{driver_module: driver_module} = display) do
-    apply(driver_module, :execute, [display, command])
+    driver_module.execute(display, command)
   end
 end
