@@ -190,7 +190,6 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   def execute(display, {:scroll, cols}), do: {:ok, scroll(display, cols)}
   def execute(display, {:right, cols}), do: {:ok, right(display, cols)}
   def execute(display, {:left, cols}), do: {:ok, left(display, cols)}
-  def execute(display, {:char, index, bitmap}), do: {:ok, char(display, index, bitmap)}
   def execute(display, {:backlight, on_off_bool}), do: {:ok, set_backlight(display, on_off_bool)}
   def execute(display, {:red, on_off_bool}), do: {:ok, set_led_color(display, :red, on_off_bool)}
   def execute(display, {:green, on_off_bool}), do: {:ok, set_led_color(display, :green, on_off_bool)}
@@ -269,14 +268,6 @@ defmodule LcdDisplay.HD44780.MCP23017 do
   defp left(display, cols) do
     write_instruction(display, @cmd_cursor_shift_control)
     left(display, cols - 1)
-  end
-
-  # Program custom character to CGRAM. We only have 8 CGRAM locations.
-  @spec char(display_driver, 0..7, list(byte)) :: display_driver
-  defp char(display, index, bitmap) when index in 0..7 and length(bitmap) === 8 do
-    write_instruction(display, @cmd_set_cgram_address ||| index <<< 3)
-    for line <- bitmap, do: write_data(display, line)
-    display
   end
 
   @spec set_backlight(display_driver, boolean) :: display_driver

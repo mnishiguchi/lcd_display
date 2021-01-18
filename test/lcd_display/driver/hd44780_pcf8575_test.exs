@@ -62,7 +62,6 @@ defmodule LcdDisplay.HD44780.PCF8575Test do
       assert {:ok, %{}} = HD44780.PCF8575.execute(d, {:scroll, 2})
       assert {:ok, %{}} = HD44780.PCF8575.execute(d, {:left, 2})
       assert {:ok, %{}} = HD44780.PCF8575.execute(d, {:right, 2})
-      assert {:ok, %{}} = HD44780.PCF8575.execute(d, {:char, 2, [1, 1, 1, 1, 1, 1, 1, 1]})
     end
 
     test "execute unsupported commands", %{display: d} do

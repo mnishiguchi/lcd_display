@@ -61,7 +61,6 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
       assert {:ok, %{}} = HD44780.SN74HC595.execute(d, {:scroll, 2})
       assert {:ok, %{}} = HD44780.SN74HC595.execute(d, {:left, 2})
       assert {:ok, %{}} = HD44780.SN74HC595.execute(d, {:right, 2})
-      assert {:ok, %{}} = HD44780.SN74HC595.execute(d, {:char, 2, [1, 1, 1, 1, 1, 1, 1, 1]})
     end
 
     test "execute unsupported commands", %{display: d} do

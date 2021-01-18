@@ -44,7 +44,6 @@ defmodule LcdDisplay.HD44780.Driver do
   | `:scroll`              | Scroll text left and right.                                   |
   | `:left`                | Move the cursor left.                                         |
   | `:right`               | Move the cursor right.                                        |
-  | `:char`                | Program custom character to CGRAM.                            |
   | `:backlight`           | Switch on/off the backlight.                                  |
   | `:red`                 | Switch on/off the red LED.                                    |
   | `:green`               | Switch on/off the green LED.                                  |
@@ -64,7 +63,6 @@ defmodule LcdDisplay.HD44780.Driver do
           | {:scroll, integer}
           | {:left, integer}
           | {:right, integer}
-          | {:char, integer, byte}
           | {:backlight, boolean}
           | {:red, boolean}
           | {:green, boolean}
