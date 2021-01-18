@@ -7,6 +7,8 @@
 `LcdDisplay` allows you to control a [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller)-compatible
 [Liquid-crystal display (LCD)](https://en.wikipedia.org/wiki/Liquid-crystal_display) in [Elixir](https://elixir-lang.org/).
 
+For the specification of the HD44780 LCD, please refer to the [HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
+
 ![nerves_hello_lcd_20201219_152639](https://user-images.githubusercontent.com/7563926/102699565-b5646700-4213-11eb-9ca1-a11bd10c619d.gif)
 
 ## Installation
@@ -16,7 +18,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "0.1.0"}
+    {:lcd_display, "~> 0.1.0"}
   ]
 end
 ```
@@ -57,7 +59,7 @@ LcdDisplay.execute(pid, :clear)
 
 When you connect an LCD standalone directly to the GPIO pins on your target device, the `LcdDisplay.HD44780.GPIO` driver module is useful.
 
-As exapmles, here are some relevant Adafruit products:
+Here are some relevant Adafruit products:
 
 - [Standard LCD 16x2 - white on blue](https://www.adafruit.com/product/181)
 - [Standard LCD 20x4 - white on blue](https://www.adafruit.com/product/198)
@@ -67,17 +69,26 @@ As exapmles, here are some relevant Adafruit products:
 #### Serial I/O
 
 When you connect an LCD through an I/O expander, one of the following driver modules can be used.
+
+- `LcdDisplay.HD44780.PCF8575`
+  - I2C
+  - [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
+- `LcdDisplay.HD44780.MCP23008`
+   - I2C
+  - [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)
+- `LcdDisplay.HD44780.MCP23017`
+   - I2C
+  - [MCP23017 data sheet](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf)
+- `LcdDisplay.HD44780.SN74HC595`
+  - SPI
+  - [SN74HC595 data sheet](https://www.ti.com/lit/ds/scls041i/scls041i.pdf)
+
 Different products out there use different I/O expanders, so please be aware of which I/O expander you are using if you use something like an I2C backpack.
 Also the pin assignment between the LCD and the I/O expander is important.
 
-- `LcdDisplay.HD44780.PCF8575` - I2C
-- `LcdDisplay.HD44780.MCP23008`  - I2C
-- `LcdDisplay.HD44780.MCP23017`  - I2C
-- `LcdDisplay.HD44780.SN74HC595` - SPI
-
 It is easy to make your own driver modules in case you want a custom pin assignment, a different I/O expander or some custom features.
 
-As exapmles, here are some relevant Adafruit products:
+Here are some relevant Adafruit products:
 
 - [i2c / SPI character LCD backpack](https://www.adafruit.com/product/292)
 - [LCD Shield Kit w/ 16x2 Character Display](https://www.adafruit.com/product/772)
@@ -85,11 +96,3 @@ As exapmles, here are some relevant Adafruit products:
 ## Thanks
 
 - [`ExLCD`](https://github.com/cthree/ex_lcd) for inspiration
-
-## Links
-
-- [HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf)
-- [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
-- [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)
-- [MCP23017 data sheet](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf)
-- [SN74HC595 data sheet](https://www.ti.com/lit/ds/scls041i/scls041i.pdf)

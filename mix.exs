@@ -3,7 +3,7 @@ defmodule LcdDisplay.MixProject do
 
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.1.1"
   @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
