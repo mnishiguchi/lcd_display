@@ -9,7 +9,7 @@
 
 For the specification of the HD44780 LCD, please refer to the [HD44780 data sheet](https://cdn-shop.adafruit.com/datasheets/HD44780.pdf).
 
-![nerves_hello_lcd_20201219_152639](https://user-images.githubusercontent.com/7563926/102699565-b5646700-4213-11eb-9ca1-a11bd10c619d.gif)
+![nerves_hello_lcd_20201213_185620](https://user-images.githubusercontent.com/7563926/102028171-ba8a6780-3d76-11eb-94f4-f82272fc3063.gif)
 
 ## Installation
 
@@ -46,6 +46,10 @@ driver_config = %{
 pid = LcdDisplay.start_display(driver_module, driver_config)
 ```
 
+The resulting process will be supervised and locally registered under the composite key of the display module and the specified display name.
+
+Many configuration values are optional, falling back to default values. Please refer to each display module documentation.
+
 ### Run commands
 
 Please refer to the `LcdDisplay.HD44780.Driver` documentation for supported display commands.
@@ -61,12 +65,13 @@ LcdDisplay.execute(pid, :clear)
 
 When you connect an LCD standalone directly to the GPIO pins on your target device, the `LcdDisplay.HD44780.GPIO` driver module is useful.
 
-Here are some relevant Adafruit products:
+Here are some relevant products:
 
-- [Standard LCD 16x2 - white on blue](https://www.adafruit.com/product/181)
-- [Standard LCD 20x4 - white on blue](https://www.adafruit.com/product/198)
-- [RGB backlight LCD 16x2 - black on RGB](https://www.adafruit.com/product/398)
-- [RGB backlight LCD 16x2 - RGB on black](https://www.adafruit.com/product/399)
+- [Adafruit Assembled Standard LCD 16x2 - White on Blue](https://www.adafruit.com/product/1447)
+- [Adafruit Standard LCD 16x2 - white on blue](https://www.adafruit.com/product/181)
+- [Adafruit Standard LCD 20x4 - white on blue](https://www.adafruit.com/product/198)
+- [Adafruit RGB backlight LCD 16x2 - black on RGB](https://www.adafruit.com/product/398)
+- [Adafruit RGB backlight LCD 16x2 - RGB on black](https://www.adafruit.com/product/399)
 
 #### Serial I/O
 
@@ -86,15 +91,22 @@ When you connect an LCD through an I/O expander, one of the following driver mod
   - [SN74HC595 data sheet](https://www.ti.com/lit/ds/scls041i/scls041i.pdf)
 
 Different products out there use different I/O expanders, so please be aware of which I/O expander you are using if you use something like an I2C backpack.
-Also the pin assignment between the LCD and the I/O expander is important.
+Also the pin assignment between the LCD and the I/O expander is important since this library assumes certain pin assignment based on popular products out there.
 
 It is easy to make your own driver modules in case you want a custom pin assignment, a different I/O expander or some custom features.
 
-Here are some relevant Adafruit products:
+Here are some relevant products:
 
-- [i2c / SPI character LCD backpack](https://www.adafruit.com/product/292)
-- [LCD Shield Kit w/ 16x2 Character Display](https://www.adafruit.com/product/772)
+- [16x2 LCD display with I2C serial interface on Amazon.com](https://www.amazon.com/s?k=i2c+16x2+lcd+module)
+- [Adafruit i2c / SPI character LCD backpack](https://www.adafruit.com/product/292)
 
 ## Thanks
 
 - [`ExLCD`](https://github.com/cthree/ex_lcd) for inspiration
+
+## Links
+
+Here are my study notes in case they help somebody:
+
+- [[Elixir/Nerves] Hello to LCD display](https://dev.to/mnishiguchi/elixir-nerves-hello-to-lcd-with-i2c-interface-31ca)
+- [HD44780 LCD, I/O expanders, I2C interface etc](https://dev.to/mnishiguchi/hd44780-lcd-i-o-expanders-i2c-interface-etc-476e)

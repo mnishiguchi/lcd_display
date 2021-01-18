@@ -97,12 +97,10 @@ or print the next messages in the log:
 
   RingLogger.next
 
-iex(1)> RingLogger.attach
-:ok
-iex(2)> NervesHelloLcd.hello_i2c()
+iex(1)>
 ```
 
-Run `NervesHelloLcd.hello_i2c()`, then "Hello world" text will be printed on your LCD.
+Follow the instructions in [mnishiguchi/lcd_display README](https://github.com/mnishiguchi/lcd_display#usage) to show "Hello" text.
 
 ## Learn more about Nerves
 
