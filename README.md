@@ -26,13 +26,14 @@ end
 ## Usage
 
 As an example, if you want to control a [Hitachi HD44780](https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller) type display through
-the 16-bit I/O expander [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf),
-you can use `LcdDisplay.HD44780.PCF8575` module as a display driver.
+the 8-bit I/O expander [PCF8574](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf),
+you can use `LcdDisplay.HD44780.PCF8574` module as a display driver.
 
 ### Start an LCD driver and get a PID
 
 ```elixir
-driver_module = LcdDisplay.HD44780.PCF8575
+driver_module = LcdDisplay.HD44780.PCF8574
+
 driver_config = %{
   display_name: "display 1", # the identifier
   i2c_bus: "i2c-1",          # I2C bus name
@@ -41,6 +42,7 @@ driver_config = %{
   cols: 16,                  # the number of display columns
   font_size: "5x8"           # "5x10" or "5x8"
 }
+
 pid = LcdDisplay.start_display(driver_module, driver_config)
 ```
 
@@ -70,9 +72,9 @@ Here are some relevant Adafruit products:
 
 When you connect an LCD through an I/O expander, one of the following driver modules can be used.
 
-- `LcdDisplay.HD44780.PCF8575`
+- `LcdDisplay.HD44780.PCF8574`
   - I2C
-  - [PCF8575 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
+  - [PCF8574 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf)
 - `LcdDisplay.HD44780.MCP23008`
    - I2C
   - [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)

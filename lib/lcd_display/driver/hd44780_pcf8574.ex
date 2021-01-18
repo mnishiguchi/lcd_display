@@ -1,7 +1,7 @@
-defmodule LcdDisplay.HD44780.PCF8575 do
+defmodule LcdDisplay.HD44780.PCF8574 do
   @moduledoc """
-  Knows how to commuticate with HD44780 type display through the 16-bit I/O expander
-  [PCF8575](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf).
+  Knows how to commuticate with HD44780 type display through the 8-bit I/O expander
+  [PCF8574](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf).
   You can turn on/off the backlight.
 
   ## Usage
@@ -25,17 +25,17 @@ defmodule LcdDisplay.HD44780.PCF8575 do
   }
 
   # Start the LCD driver and get the initial display state.
-  {:ok, display} = LcdDisplay.HD44780.PCF8575.start(config)
+  {:ok, display} = LcdDisplay.HD44780.PCF8574.start(config)
 
   # Run a command and the display state will be updated.
-  {:ok, display} = LcdDisplay.HD44780.PCF8575.execute(display, {:print, "Hello world"})
+  {:ok, display} = LcdDisplay.HD44780.PCF8574.execute(display, {:print, "Hello world"})
   ```
 
   ## Pin assignment
 
   This module assumes the following pin assignment:
 
-  | PCF8575 | HD44780              |
+  | PCF8574 | HD44780              |
   | ------- | -------------------- |
   | P0      | RS (Register Select) |
   | P1      | -                    |

@@ -3,7 +3,7 @@ defmodule LcdDisplay.MixProject do
 
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.1.2"
   @source_url "https://github.com/mnishiguchi/lcd_display"
 
   def project do
@@ -67,7 +67,7 @@ defmodule LcdDisplay.MixProject do
       links: %{
         "GitHub" => @source_url,
         "HD44780 data sheet" => "https://cdn-shop.adafruit.com/datasheets/HD44780.pdf",
-        "PCF8575 data sheet" => "https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf",
+        "PCF8574 data sheet" => "https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf",
         "MCP23008 data sheet" =>
           "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf",
         "MCP23017 data sheet" => "https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf",

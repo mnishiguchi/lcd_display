@@ -5,13 +5,13 @@ defmodule NervesHelloLcd do
   ## Examples
 
       NervesHelloLcd.hello_gpio
-      NervesHelloLcd.hello_pcf8575
+      NervesHelloLcd.hello_pcf8574
       NervesHelloLcd.hello_mcp23008
       NervesHelloLcd.hello_mcp23017
       NervesHelloLcd.hello_sn74hc595
   """
 
-  def hello_pcf8575(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.PCF8575, opts)
+  def hello_pcf8574(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.PCF8574, opts)
 
   def hello_mcp23008(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.MCP23008, opts)
 
