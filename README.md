@@ -55,7 +55,14 @@ Many configuration values are optional, falling back to default values. Please r
 Please refer to the `LcdDisplay.HD44780.Driver` documentation for supported display commands.
 
 ```elixir
+# Print text
 LcdDisplay.execute(pid, {:print, "Hello world"})
+
+# Print a character at a time
+LcdDisplay.execute(pid, {:print, 0b00110001})
+LcdDisplay.execute(pid, {:print, 0b00110000})
+LcdDisplay.execute(pid, {:print, 0b00100101})
+
 LcdDisplay.execute(pid, :clear)
 ```
 

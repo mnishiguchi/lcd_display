@@ -148,6 +148,8 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
 
   defp home(display), do: display |> write_instruction(@cmd_return_home) |> delay(2)
 
+  defp print(display, char) when is_integer(char), do: write_data(display, char)
+
   defp print(display, text) when is_binary(text) do
     # Translates a text to a charlist (list of bytes).
     text |> to_charlist() |> Enum.each(&write_data(display, &1))

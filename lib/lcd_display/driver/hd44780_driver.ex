@@ -34,7 +34,7 @@ defmodule LcdDisplay.HD44780.Driver do
   | ---------------------- | ------------------------------------------------------------- |
   | `:clear`               | Clear the display.                                            |
   | `:home`                | Move the cursor home.                                         |
-  | `:print`               | Print a text at the current cursor.                           |
+  | `:print`               | Print a character or text at the current cursor.              |
   | `:set_cursor`          | Set the cursor position (row and column).                     |
   | `:cursor`              | Switch on/off the underline cursor.                           |
   | `:display`             | Switch on/off the display without losing what is on it.       |
@@ -52,7 +52,7 @@ defmodule LcdDisplay.HD44780.Driver do
   @type command ::
           :clear
           | :home
-          | {:print, String.t()}
+          | {:print, String.t() | byte}
           | {:set_cursor, integer, integer}
           | {:cursor, boolean}
           | {:blink, boolean}
