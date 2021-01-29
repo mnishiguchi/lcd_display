@@ -115,5 +115,5 @@ Here are some relevant products:
 
 Here are my study notes in case they help somebody:
 
-- [[Elixir/Nerves] Hello to LCD display](https://dev.to/mnishiguchi/elixir-nerves-hello-to-lcd-with-i2c-interface-31ca)
+- [Hello to LCD display](https://dev.to/mnishiguchi/elixir-nerves-hello-to-lcd-with-i2c-interface-31ca)
 - [HD44780 LCD, I/O expanders, I2C interface etc](https://dev.to/mnishiguchi/hd44780-lcd-i-o-expanders-i2c-interface-etc-476e)
