@@ -65,9 +65,8 @@ config :vintage_net,
          networks: [
            %{
              key_mgmt: :wpa_psk,
-             ssid:
-               System.get_env("WIFI_SSID") || raise("Environment variable WIFI_SSID is missing."),
-             psk: System.get_env("WIFI_PSK") || raise("Environment variable WIFI_PSK is missing.")
+             ssid: System.get_env("WIFI_SSID"),
+             psk: System.get_env("WIFI_PSK")
            }
          ]
        },
