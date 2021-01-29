@@ -6,13 +6,13 @@ defmodule LcdDisplay.HD44780.PCF8574Test do
 
   alias LcdDisplay.HD44780
 
-  setup do
-    setup_i2c_mock()
-    :ok
-  end
-
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
+
+  setup do
+    Mox.stub_with(LcdDisplay.MockI2C, LcdDisplay.I2C.Stub)
+    :ok
+  end
 
   test "LcdDisplay.I2C mock works" do
     assert {:ok, i2c_ref} = LcdDisplay.I2C.open("i2c-1")
@@ -84,12 +84,5 @@ defmodule LcdDisplay.HD44780.PCF8574Test do
       assert {:ok, %{backlight: false}} = HD44780.PCF8574.execute(d, {:backlight, false})
       assert {:ok, %{backlight: true}} = HD44780.PCF8574.execute(d, {:backlight, true})
     end
-  end
-
-  defp setup_i2c_mock() do
-    # https://hexdocs.pm/mox/Mox.html#stub/3
-    LcdDisplay.MockI2C
-    |> stub(:open, fn _i2c_bus -> {:ok, Kernel.make_ref()} end)
-    |> stub(:write, fn _ref, _address, _data -> :ok end)
   end
 end

@@ -1,3 +1,16 @@
+defmodule LcdDisplay.SPI.Behaviour do
+  @moduledoc """
+  Defines a behaviour required for SPI abstraction.
+  """
+
+  @type spi_bus :: String.t()
+  @type spi_address :: byte
+  @type data :: binary
+
+  @callback open(binary() | charlist(), list) :: {:ok, reference} | {:error, any}
+  @callback transfer(reference, data) :: {:ok, binary()} | {:error, any}
+end
+
 defmodule LcdDisplay.SPI do
   @moduledoc """
   Lets you communicate with hardware devices using the [SPI](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) protocol.
@@ -5,19 +18,6 @@ defmodule LcdDisplay.SPI do
   """
 
   require Logger
-
-  defmodule Behaviour do
-    @moduledoc """
-    Defines a behaviour required for SPI abstraction.
-    """
-
-    @type spi_bus :: String.t()
-    @type spi_address :: byte
-    @type data :: binary
-
-    @callback open(binary() | charlist(), list) :: {:ok, reference} | {:error, any}
-    @callback transfer(reference, data) :: {:ok, binary()} | {:error, any}
-  end
 
   @behaviour LcdDisplay.SPI.Behaviour
 
@@ -32,4 +32,14 @@ defmodule LcdDisplay.SPI do
     # https://hexdocs.pm/elixir/master/library-guidelines.html#avoid-compile-time-application-configuration
     Application.get_env(:lcd_display, :spi_module, Circuits.SPI)
   end
+end
+
+defmodule LcdDisplay.SPI.Stub do
+  @moduledoc false
+
+  @behaviour LcdDisplay.SPI.Behaviour
+
+  def open(_bus_name, []), do: {:ok, Kernel.make_ref()}
+
+  def transfer(_reference, _data), do: {:ok, "received data"}
 end

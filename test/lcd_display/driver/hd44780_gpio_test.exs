@@ -6,13 +6,13 @@ defmodule LcdDisplay.HD44780.GPIOTest do
 
   alias LcdDisplay.HD44780
 
-  setup do
-    setup_gpio_mock()
-    :ok
-  end
-
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
+
+  setup do
+    Mox.stub_with(LcdDisplay.MockGPIO, LcdDisplay.GPIO.Stub)
+    :ok
+  end
 
   test "LcdDisplay.GPIO mock works" do
     assert {:ok, gpio_ref} = LcdDisplay.GPIO.open(12, :output)
@@ -127,12 +127,5 @@ defmodule LcdDisplay.HD44780.GPIOTest do
       pin_d7: 10,
       pin_led: 12
     }
-  end
-
-  defp setup_gpio_mock() do
-    # https://hexdocs.pm/mox/Mox.html#stub/3
-    LcdDisplay.MockGPIO
-    |> stub(:open, fn _gpio_pin, :output -> {:ok, Kernel.make_ref()} end)
-    |> stub(:write, fn _ref, _hign_low -> :ok end)
   end
 end

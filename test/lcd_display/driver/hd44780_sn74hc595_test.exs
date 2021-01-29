@@ -6,13 +6,13 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
 
   alias LcdDisplay.HD44780
 
-  setup do
-    setup_spi_mock()
-    :ok
-  end
-
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
+
+  setup do
+    Mox.stub_with(LcdDisplay.MockSPI, LcdDisplay.SPI.Stub)
+    :ok
+  end
 
   test "LcdDisplay.SPI mock works" do
     assert {:ok, spi_ref} = LcdDisplay.SPI.open("spidev0.0")
@@ -83,12 +83,5 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
       assert {:ok, %{backlight: false}} = HD44780.SN74HC595.execute(d, {:backlight, false})
       assert {:ok, %{backlight: true}} = HD44780.SN74HC595.execute(d, {:backlight, true})
     end
-  end
-
-  defp setup_spi_mock() do
-    # https://hexdocs.pm/mox/Mox.html#stub/3
-    LcdDisplay.MockSPI
-    |> stub(:open, fn _spi_bus, _opts -> {:ok, Kernel.make_ref()} end)
-    |> stub(:transfer, fn _ref, _data -> {:ok, "received data"} end)
   end
 end
