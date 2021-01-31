@@ -44,8 +44,6 @@ driver_config = %{
 {:ok, pid} = LcdDisplay.start_link(driver_config)
 ```
 
-The resulting process will be supervised and locally registered under the composite key of the display module and the specified display name.
-
 Many configuration values are optional, falling back to default values. Please refer to each display module documentation.
 
 ### Run commands
@@ -56,12 +54,13 @@ Please refer to the `LcdDisplay.HD44780.Driver` documentation for supported disp
 # Print text
 LcdDisplay.execute(pid, {:print, "Hello world"})
 
+# Clear the display
+LcdDisplay.execute(pid, :clear)
+
 # Print a character at a time
 LcdDisplay.execute(pid, {:print, 0b00110001})
 LcdDisplay.execute(pid, {:print, 0b00110000})
 LcdDisplay.execute(pid, {:print, 0b00100101})
-
-LcdDisplay.execute(pid, :clear)
 ```
 
 ### Driver modules
