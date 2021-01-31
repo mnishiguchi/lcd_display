@@ -32,9 +32,8 @@ you can use `LcdDisplay.HD44780.PCF8574` module as a display driver.
 ### Start an LCD driver and get a PID
 
 ```elixir
-driver_module = LcdDisplay.HD44780.PCF8574
-
 driver_config = %{
+  driver_module: LcdDisplay.HD44780.PCF8574,
   display_name: "display 1", # the identifier
   i2c_bus: "i2c-1",          # I2C bus name
   i2c_address: 0x27,         # 7-bit address
@@ -43,7 +42,7 @@ driver_config = %{
   font_size: "5x8"           # "5x10" or "5x8"
 }
 
-pid = LcdDisplay.start_display(driver_module, driver_config)
+{:ok, pid} = LcdDisplay.start_link(driver_config)
 ```
 
 The resulting process will be supervised and locally registered under the composite key of the display module and the specified display name.

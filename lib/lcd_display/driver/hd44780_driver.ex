@@ -148,3 +148,33 @@ defmodule LcdDisplay.HD44780.Driver do
     end
   end
 end
+
+defmodule LcdDisplay.HD44780.Stub do
+  @moduledoc false
+
+  @behaviour LcdDisplay.HD44780.Driver
+
+  def start(config) do
+    display_name = config[:display_name]
+    {:ok, display_stub(display_name)}
+  end
+
+  def execute(display, _command) do
+    display_name = display[:display_name]
+    {:ok, display_stub(display_name)}
+  end
+
+  def display_stub(display_name) do
+    %{
+      driver_module: LcdDisplay.MockHD44780,
+      display_name: display_name,
+      i2c_address: 39,
+      i2c_ref: make_ref(),
+      cols: 16,
+      display_control: 12,
+      entry_mode: 6,
+      rows: 2,
+      backlight: true
+    }
+  end
+end

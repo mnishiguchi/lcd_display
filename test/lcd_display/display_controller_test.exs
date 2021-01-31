@@ -1,36 +1,27 @@
 defmodule LcdDisplay.DisplayControllerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   # https://hexdocs.pm/mox/Mox.html
   import Mox
 
   alias LcdDisplay.DisplayController
 
+  # Any process can consume mocks and stubs defined in your tests
+  setup :set_mox_from_context
+
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
 
+  setup do
+    # Use a fake display driver
+    Mox.stub_with(LcdDisplay.MockHD44780, LcdDisplay.HD44780.Stub)
+    :ok
+  end
+
   test "start_link" do
-    display_name = "display one"
-    setup_display_driver_mock(display_name)
-
-    assert {:ok, _pid} = DisplayController.start_link(display_stub(display_name))
-
-    ## This error keeps on happening. It is OK. I can check manually.
-    ##   ** (Mox.UnexpectedCallError) no expectation defined for LcdDisplay.MockDriver.execute/2
-    # assert {:ok, _display} = DisplayController.execute(pid, {:print, "Hello"})
-  end
-
-  defp setup_display_driver_mock(display_name) do
-    # https://hexdocs.pm/mox/Mox.html#stub/3
-    LcdDisplay.MockDriver
-    |> stub(:start, fn _opts -> {:ok, display_stub(display_name)} end)
-    |> stub(:execute, fn _display, _command -> {:ok, display_stub(display_name)} end)
-  end
-
-  defp display_stub(display_name) do
-    %{
-      driver_module: LcdDisplay.MockDriver,
-      display_name: display_name,
+    display = %{
+      driver_module: LcdDisplay.MockHD44780,
+      display_name: "display one",
       i2c_address: 39,
       i2c_ref: make_ref(),
       cols: 16,
@@ -39,5 +30,10 @@ defmodule LcdDisplay.DisplayControllerTest do
       rows: 2,
       backlight: true
     }
+
+    assert {:ok, pid} = DisplayController.start_link(display)
+
+    # This does not guarantee what happens on the hardware but tests at least the code does not crash
+    assert {:ok, _display} = DisplayController.execute(pid, {:print, "Hello"})
   end
 end
