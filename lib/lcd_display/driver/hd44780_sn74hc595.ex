@@ -13,7 +13,6 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
 
   ```
   config = %{
-    display_name: "display 1", # the identifier
     spi_bus: "spidev0.0",      # SPI bus name
     rows: 2,                   # the number of display rows
     cols: 16,                  # the number of display columns
@@ -84,7 +83,6 @@ defmodule LcdDisplay.HD44780.SN74HC595 do
 
     %{
       driver_module: __MODULE__,
-      display_name: opts[:display_name] || spi_bus,
       spi_ref: spi_ref,
       rows: opts[:rows] || @default_rows,
       cols: opts[:cols] || @default_cols,

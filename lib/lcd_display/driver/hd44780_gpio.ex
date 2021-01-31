@@ -8,7 +8,6 @@ defmodule LcdDisplay.HD44780.GPIO do
 
   ```
   config = %{
-    display_name: "display 1",
     pin_rs: 2,
     pin_rw: 3,
     pin_en: 4,
@@ -32,7 +31,6 @@ defmodule LcdDisplay.HD44780.GPIO do
   alias LcdDisplay.GPIO, as: ParallelBus
 
   @required_config_keys [
-    :display_name,
     :pin_rs,
     :pin_en,
     :pin_d4,

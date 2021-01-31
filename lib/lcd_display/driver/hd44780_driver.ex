@@ -12,7 +12,6 @@ defmodule LcdDisplay.HD44780.Driver do
   """
   @type t :: %{
           required(:driver_module) => atom,
-          required(:display_name) => any,
           required(:rows) => num_rows,
           required(:cols) => num_cols,
           required(:entry_mode) => byte,
@@ -155,19 +154,16 @@ defmodule LcdDisplay.HD44780.Stub do
   @behaviour LcdDisplay.HD44780.Driver
 
   def start(config) do
-    display_name = config[:display_name]
-    {:ok, display_stub(display_name)}
+    {:ok, display_stub()}
   end
 
   def execute(display, _command) do
-    display_name = display[:display_name]
-    {:ok, display_stub(display_name)}
+    {:ok, display_stub()}
   end
 
-  def display_stub(display_name) do
+  def display_stub() do
     %{
       driver_module: LcdDisplay.MockHD44780,
-      display_name: display_name,
       i2c_address: 39,
       i2c_ref: make_ref(),
       cols: 16,

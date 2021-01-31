@@ -34,7 +34,6 @@ you can use `LcdDisplay.HD44780.PCF8574` module as a display driver.
 ```elixir
 driver_config = %{
   driver_module: LcdDisplay.HD44780.PCF8574,
-  display_name: "display 1", # the identifier
   i2c_bus: "i2c-1",          # I2C bus name
   i2c_address: 0x27,         # 7-bit address
   rows: 2,                   # the number of display rows

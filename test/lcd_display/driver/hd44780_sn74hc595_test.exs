@@ -24,7 +24,6 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
 
     assert %{
              driver_module: LcdDisplay.HD44780.SN74HC595,
-             display_name: "spidev0.0",
              spi_ref: spi_ref,
              rows: 2,
              cols: 16,
@@ -37,9 +36,9 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
   end
 
   test "start with some options" do
-    opts = %{display_name: "Display 1", rows: 4, cols: 20}
+    opts = %{rows: 4, cols: 20}
     {:ok, display} = HD44780.SN74HC595.start(opts)
-    assert %{display_name: "Display 1", rows: 4, cols: 20} = display
+    assert %{rows: 4, cols: 20} = display
   end
 
   describe "commands" do

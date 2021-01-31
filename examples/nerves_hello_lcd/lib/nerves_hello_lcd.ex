@@ -46,7 +46,6 @@ defmodule NervesHelloLcd do
     config =
       opts
       |> Enum.into(%{
-        display_name: :rand.uniform(0xFF),
         pin_rs: 5,
         pin_rw: 6,
         pin_en: 13,

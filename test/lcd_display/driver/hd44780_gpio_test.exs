@@ -25,7 +25,6 @@ defmodule LcdDisplay.HD44780.GPIOTest do
 
     assert %{
              driver_module: LcdDisplay.HD44780.GPIO,
-             display_name: "display 1",
              font_size: "5x8",
              rows: 2,
              cols: 16,
@@ -62,7 +61,6 @@ defmodule LcdDisplay.HD44780.GPIOTest do
   describe "required config keys" do
     test "start with missing required keys" do
       c = default_config()
-      assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:display_name]))
       assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_rs]))
       assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_en]))
       assert {:error, %KeyError{}} = HD44780.GPIO.start(Map.drop(c, [:pin_d4]))
@@ -114,7 +112,6 @@ defmodule LcdDisplay.HD44780.GPIOTest do
 
   defp default_config do
     %{
-      display_name: "display 1",
       rows: 2,
       cols: 16,
       font_size: "5x8",

@@ -19,7 +19,6 @@ defmodule LcdDisplayTest do
   test "start_link" do
     config = %{
       driver_module: LcdDisplay.MockHD44780,
-      display_name: "display one",
       i2c_address: 39,
       cols: 16,
       rows: 2

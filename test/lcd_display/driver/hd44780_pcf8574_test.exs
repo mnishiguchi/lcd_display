@@ -25,7 +25,6 @@ defmodule LcdDisplay.HD44780.PCF8574Test do
     assert %{
              driver_module: LcdDisplay.HD44780.PCF8574,
              i2c_address: 0x27,
-             display_name: "i2c-1",
              i2c_ref: i2c_ref,
              rows: 2,
              cols: 16,
@@ -38,9 +37,9 @@ defmodule LcdDisplay.HD44780.PCF8574Test do
   end
 
   test "start with some options" do
-    opts = %{i2c_address: 0x3F, display_name: "Display 1", rows: 4, cols: 20}
+    opts = %{i2c_address: 0x3F, rows: 4, cols: 20}
     {:ok, display} = HD44780.PCF8574.start(opts)
-    assert %{i2c_address: 0x3F, display_name: "Display 1", rows: 4, cols: 20} = display
+    assert %{i2c_address: 0x3F, rows: 4, cols: 20} = display
   end
 
   describe "commands" do

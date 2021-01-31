@@ -16,7 +16,6 @@ defmodule LcdDisplay.HD44780.PCF8574 do
 
   ```
   config = %{
-    display_name: "display 1", # the identifier
     i2c_bus: "i2c-1",          # I2C bus name
     i2c_address: 0x27,         # 7-bit address
     rows: 2,                   # the number of display rows
@@ -91,7 +90,6 @@ defmodule LcdDisplay.HD44780.PCF8574 do
 
     %{
       driver_module: __MODULE__,
-      display_name: opts[:display_name] || i2c_bus,
       i2c_ref: i2c_ref,
       i2c_address: i2c_address,
       rows: opts[:rows] || @default_rows,
