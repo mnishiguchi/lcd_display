@@ -153,15 +153,22 @@ defmodule LcdDisplay.HD44780.Stub do
 
   @behaviour LcdDisplay.HD44780.Driver
 
-  def start(config) do
+  @impl true
+  def start(_config) do
     {:ok, display_stub()}
   end
 
-  def execute(display, _command) do
+  @impl true
+  def execute(_display, _command) do
     {:ok, display_stub()}
   end
 
-  def display_stub() do
+  @impl true
+  def write_data(_display, _data) do
+    display_stub()
+  end
+
+  defp display_stub() do
     %{
       driver_module: LcdDisplay.MockHD44780,
       i2c_address: 39,
