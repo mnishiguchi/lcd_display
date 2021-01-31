@@ -18,7 +18,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "~> 0.1.0"}
+    {:lcd_display, "~> 0.2.0"}
   ]
 end
 ```
@@ -66,7 +66,10 @@ LcdDisplay.execute(pid, :clear)
 
 ### Driver modules
 
-#### Parallel I/O
+Different products out there use different I/O expanders, so please be aware of which I/O expander you are using if you use something like an I2C backpack.
+Also the pin assignment between the LCD and the I/O expander is important since this library assumes certain pin assignment based on popular products out there.
+
+#### for parallel I/O
 
 When you connect an LCD standalone directly to the GPIO pins on your target device, the `LcdDisplay.HD44780.GPIO` driver module is useful.
 
@@ -78,40 +81,18 @@ Here are some relevant products:
 - [Adafruit RGB backlight LCD 16x2 - black on RGB](https://www.adafruit.com/product/398)
 - [Adafruit RGB backlight LCD 16x2 - RGB on black](https://www.adafruit.com/product/399)
 
-#### Serial I/O
+#### for PCF8574-based I2C modules
 
-When you connect an LCD through an I/O expander, one of the following driver modules can be used.
+[Many inexpensive I2C modules on Amazon.com](https://www.amazon.com/s?k=i2c+16x2+lcd+module) uses [PCF8574](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf). A pre-assembled 16x2 LCD with I2C module is typically less than US$10. [Handson Technology I2C Serial Interface 1602 LCD Module User Guide](http://www.handsontec.com/dataspecs/module/I2C_1602_LCD.pdf) summarizes the typical specifications of the PCF8574-based I2C module.
 
-- `LcdDisplay.HD44780.PCF8574`
-  - I2C
-  - [PCF8574 data sheet](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf)
-- `LcdDisplay.HD44780.MCP23008`
-   - I2C
-  - [MCP23008 data sheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf)
-- `LcdDisplay.HD44780.MCP23017`
-   - I2C
-  - [MCP23017 data sheet](https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf)
-- `LcdDisplay.HD44780.SN74HC595`
-  - SPI
-  - [SN74HC595 data sheet](https://www.ti.com/lit/ds/scls041i/scls041i.pdf)
+#### for Adafruit I2C / SPI character LCD backpack
 
-Different products out there use different I/O expanders, so please be aware of which I/O expander you are using if you use something like an I2C backpack.
-Also the pin assignment between the LCD and the I/O expander is important since this library assumes certain pin assignment based on popular products out there.
+The [Adafruit i2c / SPI character LCD backpack](https://www.adafruit.com/product/292) supports both I2C and SPI interfaces. It uses [MCP23008](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf) for I2C and [SN74HC595](https://www.ti.com/lit/ds/scls041i/scls041i.pdf) for SPI as of writing.
+
+#### for other I/O expanders
 
 It is easy to make your own driver modules in case you want a custom pin assignment, a different I/O expander or some custom features.
-
-Here are some relevant products:
-
-- [16x2 LCD display with I2C serial interface on Amazon.com](https://www.amazon.com/s?k=i2c+16x2+lcd+module)
-- [Adafruit i2c / SPI character LCD backpack](https://www.adafruit.com/product/292)
 
 ## Thanks
 
 - [`ExLCD`](https://github.com/cthree/ex_lcd) for inspiration
-
-## Links
-
-Here are my study notes in case they help somebody:
-
-- [Hello to LCD display](https://dev.to/mnishiguchi/elixir-nerves-hello-to-lcd-with-i2c-interface-31ca)
-- [HD44780 LCD, I/O expanders, I2C interface etc](https://dev.to/mnishiguchi/hd44780-lcd-i-o-expanders-i2c-interface-etc-476e)
