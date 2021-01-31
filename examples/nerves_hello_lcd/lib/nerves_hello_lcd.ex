@@ -16,7 +16,7 @@ defmodule NervesHelloLcd do
   def hello_mcp23008(opts \\ []), do: hello_i2c(LcdDisplay.HD44780.MCP23008, opts)
 
   def hello_mcp23017(opts \\ []) do
-    pid = hello_i2c(LcdDisplay.HD44780.MCP23017, opts)
+    {:ok, pid} = hello_i2c(LcdDisplay.HD44780.MCP23017, opts)
 
     0..5
     |> Enum.each(fn _ ->
@@ -27,8 +27,9 @@ defmodule NervesHelloLcd do
 
   def hello_i2c(driver_module, opts \\ []) do
     Circuits.I2C.detect_devices()
-    config = opts |> Enum.into(%{}) |> IO.inspect()
-    pid = LcdDisplay.start_display(driver_module, config)
+    config = opts |> Enum.into(%{driver_module: driver_module}) |> IO.inspect()
+
+    {:ok, pid} = LcdDisplay.start_link(config)
     qa_steps(pid)
     pid
   end
@@ -36,8 +37,9 @@ defmodule NervesHelloLcd do
   def hello_sn74hc595(opts \\ []), do: hello_spi(LcdDisplay.HD44780.SN74HC595, opts)
 
   def hello_spi(driver_module, opts \\ []) do
-    config = opts |> Enum.into(%{}) |> IO.inspect()
-    pid = LcdDisplay.start_display(driver_module, config)
+    config = opts |> Enum.into(%{driver_module: driver_module}) |> IO.inspect()
+
+    {:ok, pid} = LcdDisplay.start_link(config)
     qa_steps(pid)
     pid
   end
@@ -46,6 +48,7 @@ defmodule NervesHelloLcd do
     config =
       opts
       |> Enum.into(%{
+        display_module: LcdDisplay.HD44780_GPIO,
         pin_rs: 5,
         pin_rw: 6,
         pin_en: 13,
@@ -57,7 +60,7 @@ defmodule NervesHelloLcd do
       })
       |> IO.inspect()
 
-    pid = LcdDisplay.start_display(LcdDisplay.HD44780_GPIO, config)
+    {:ok, pid} = LcdDisplay.start_link(config)
     qa_steps(pid)
     pid
   end
