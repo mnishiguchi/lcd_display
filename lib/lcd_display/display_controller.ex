@@ -13,9 +13,9 @@ defmodule LcdDisplay.DisplayController do
   Starts a display driver process and registers the process with a composite key
   of driver module and display name.
   """
-  @spec start_link(display_driver) :: {:ok, pid} | {:error, any}
-  def start_link(display_driver) do
-    GenServer.start_link(__MODULE__, display_driver)
+  @spec start_link(display_driver, keyword()) :: {:ok, pid} | {:error, any}
+  def start_link(display_driver, opts \\ []) do
+    GenServer.start_link(__MODULE__, display_driver, opts)
   end
 
   @doc """

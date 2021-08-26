@@ -14,10 +14,10 @@ defmodule LcdDisplay do
   Starts a display controller process for a specified.
   """
   @spec start_link(config) :: {:ok, pid} | {:error, any}
-  def start_link(config) when is_map(config) do
+  def start_link(config, opts \\ []) when is_map(config) do
     {%{driver_module: driver_module}, other_config} = Map.split(config, [:driver_module])
     display = initialize_display(driver_module, other_config)
-    LcdDisplay.DisplayController.start_link(display)
+    LcdDisplay.DisplayController.start_link(display, opts)
   end
 
   @doc """
