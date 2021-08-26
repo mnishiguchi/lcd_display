@@ -11,6 +11,17 @@ defmodule LcdDisplay do
         }
 
   @doc """
+  Returns a specification to start this module under a supervisor.
+  """
+  @spec child_spec(config, GenServer.options()) :: Supervisor.child_spec()
+  def child_spec(config, opts \\ []) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [config, opts]}
+    }
+  end
+
+  @doc """
   Starts a display controller process for a specified.
   """
   @spec start_link(config, GenServer.options()) :: {:ok, pid} | {:error, any}
