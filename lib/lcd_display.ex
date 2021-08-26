@@ -13,7 +13,7 @@ defmodule LcdDisplay do
   @doc """
   Starts a display controller process for a specified.
   """
-  @spec start_link(config) :: {:ok, pid} | {:error, any}
+  @spec start_link(config, GenServer.options()) :: {:ok, pid} | {:error, any}
   def start_link(config, opts \\ []) when is_map(config) do
     {%{driver_module: driver_module}, other_config} = Map.split(config, [:driver_module])
     display = initialize_display(driver_module, other_config)
@@ -23,9 +23,9 @@ defmodule LcdDisplay do
   @doc """
   Executes a supported command.
   """
-  @spec execute(pid, display_command) :: {:ok, display_driver} | {:error, any}
-  def execute(pid, command) when is_pid(pid) do
-    LcdDisplay.DisplayController.execute(pid, command)
+  @spec execute(GenServer.server(), display_command) :: {:ok, display_driver} | {:error, any}
+  def execute(server, command) do
+    LcdDisplay.DisplayController.execute(server, command)
   end
 
   @spec initialize_display(atom, map) :: {:ok, display_driver} | {:error, any}
