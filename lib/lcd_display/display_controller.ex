@@ -32,7 +32,7 @@ defmodule LcdDisplay.DisplayController do
 
   @impl true
   def handle_call(command, _from, display) do
-    Logger.info(inspect(command))
+    # Logger.info(inspect(command))
 
     case result = execute_display_command(command, display) do
       {:ok, new_display} -> {:reply, result, Map.merge(display, new_display)}
