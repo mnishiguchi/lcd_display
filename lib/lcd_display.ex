@@ -27,8 +27,14 @@ defmodule LcdDisplay do
   @spec start_link(config, GenServer.options()) :: {:ok, pid} | {:error, any}
   def start_link(config, opts \\ []) when is_map(config) do
     {%{driver_module: driver_module}, other_config} = Map.split(config, [:driver_module])
-    display = initialize_display(driver_module, other_config)
-    LcdDisplay.DisplayController.start_link(display, opts)
+
+    case initialize_display(driver_module, other_config) do
+      {:ok, display} ->
+        LcdDisplay.DisplayController.start_link(display, opts)
+
+      {:error, _reason} ->
+        :ignore
+    end
   end
 
   @doc """
@@ -41,9 +47,6 @@ defmodule LcdDisplay do
 
   @spec initialize_display(atom, map) :: {:ok, display_driver} | {:error, any}
   defp initialize_display(driver_module, config) when is_atom(driver_module) and is_map(config) do
-    case driver_module.start(config) do
-      {:ok, display} -> display
-      {:error, reason} -> {:error, reason}
-    end
+    driver_module.start(config)
   end
 end
