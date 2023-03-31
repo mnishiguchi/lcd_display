@@ -100,8 +100,7 @@ defmodule LcdDisplay.HD44780.Driver do
   """
   defmacro __using__(_) do
     quote do
-      use Bitwise
-
+      import Bitwise
       import LcdDisplay.HD44780.Util
 
       @behaviour LcdDisplay.HD44780.Driver
