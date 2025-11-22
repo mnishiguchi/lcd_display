@@ -63,7 +63,7 @@ defmodule LcdDisplay.HD44780.SN74HC595Test do
     end
 
     test "execute unsupported commands", %{display: d} do
-      assert {:error, {:unsupported, _command}} = HD44780.SN74HC595.execute(d, {:write, 'H'})
+      assert {:error, {:unsupported, _command}} = HD44780.SN74HC595.execute(d, {:write, ~c"H"})
       assert {:error, {:unsupported, _command}} = HD44780.SN74HC595.execute(d, {:text_direction, false})
       assert {:error, {:unsupported, _command}} = HD44780.SN74HC595.execute(d, {:char, "invalid args"})
     end

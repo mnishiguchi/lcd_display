@@ -181,7 +181,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     entry_mode =
       if on_off_bool,
         do: display.entry_mode ||| flag,
-        else: display.entry_mode &&& ~~~flag
+        else: display.entry_mode &&& bnot(flag)
 
     write_feature(%{display | entry_mode: entry_mode}, :entry_mode)
   end
@@ -191,7 +191,7 @@ defmodule LcdDisplay.HD44780.GPIO do
     display_control =
       if on_off_bool,
         do: display.display_control ||| flag,
-        else: display.display_control &&& ~~~flag
+        else: display.display_control &&& bnot(flag)
 
     write_feature(%{display | display_control: display_control}, :display_control)
   end

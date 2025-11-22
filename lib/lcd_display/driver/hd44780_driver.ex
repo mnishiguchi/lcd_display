@@ -163,6 +163,11 @@ defmodule LcdDisplay.HD44780.Stub do
   end
 
   @impl true
+  def write_instruction(_display, _byte) do
+    display_stub()
+  end
+
+  @impl true
   def write_data(_display, _data) do
     display_stub()
   end
