@@ -18,7 +18,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "~> 0.2.0"}
+    {:lcd_display, "~> 0.2"}
   ]
 end
 ```
@@ -41,7 +41,7 @@ driver_config = %{
   font_size: "5x8"           # "5x10" or "5x8"
 }
 
-{:ok, pid} = LcdDisplay.start_link(driver_config)
+{:ok, pid} = LcdDisplay.CharacterLcd.start_link(driver_config)
 ```
 
 Many configuration values are optional, falling back to default values. Please refer to each display module documentation.
@@ -52,15 +52,15 @@ Please refer to the `LcdDisplay.HD44780.Driver` documentation for supported disp
 
 ```elixir
 # Print text
-LcdDisplay.execute(pid, {:print, "Hello world"})
+LcdDisplay.CharacterLcd.execute(pid, {:print, "Hello world"})
 
 # Clear the display
-LcdDisplay.execute(pid, :clear)
+LcdDisplay.CharacterLcd.execute(pid, :clear)
 
 # Print a character at a time
-LcdDisplay.execute(pid, {:print, 0b00110001})
-LcdDisplay.execute(pid, {:print, 0b00110000})
-LcdDisplay.execute(pid, {:print, 0b00100101})
+LcdDisplay.CharacterLcd.execute(pid, {:print, 0b00110001})
+LcdDisplay.CharacterLcd.execute(pid, {:print, 0b00110000})
+LcdDisplay.CharacterLcd.execute(pid, {:print, 0b00100101})
 ```
 
 ### Driver modules
