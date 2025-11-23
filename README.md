@@ -18,7 +18,7 @@ You can install `LcdDisplay` by adding `lcd_display` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:lcd_display, "~> 0.2"}
+    {:lcd_display, "~> 0.3"}
   ]
 end
 ```
