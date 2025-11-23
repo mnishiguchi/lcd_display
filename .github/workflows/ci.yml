@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23]
+        elixir: [1.19]
+        otp: [28]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -29,13 +29,13 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -60,8 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23]
+        elixir: [1.19]
+        otp: [28]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -74,13 +74,13 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -105,8 +105,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elixir: [1.11]
-        otp: [23]
+        elixir: [1.19]
+        otp: [28]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -119,13 +119,13 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -136,3 +136,4 @@ jobs:
 
       - name: Run test
         run: mix test --trace --slowest 10
+
