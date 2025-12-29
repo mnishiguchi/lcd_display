@@ -1,8 +1,14 @@
 defmodule LcdDisplay.ST7796 do
+  @moduledoc """
+  Driver for ST7796-based graphic LCD panels.
+  """
+
   use LcdDisplay.DisplayDriver, driver_impl: LcdDisplay.ST7796.DriverImpl
 end
 
 defmodule LcdDisplay.ST7796.DriverImpl do
+  @moduledoc false
+
   require Logger
   import Bitwise
 

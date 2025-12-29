@@ -1,4 +1,8 @@
 defmodule LcdDisplay.DisplayDriver do
+  @moduledoc """
+  Shared display driver helpers used by graphic LCD panel modules.
+  """
+
   defmacro __using__(opts) do
     driver_impl = Keyword.fetch!(opts, :driver_impl)
 
@@ -27,6 +31,8 @@ defmodule LcdDisplay.DisplayDriver do
 end
 
 defmodule LcdDisplay.DisplayDriver.DisplayContract do
+  @moduledoc false
+
   @callback init(Keyword.t()) :: {:ok, term()} | {:stop, term()}
   @callback terminate(reason :: term(), struct()) :: any()
 
@@ -46,6 +52,8 @@ defmodule LcdDisplay.DisplayDriver.DisplayContract do
 end
 
 defmodule LcdDisplay.DisplayDriver.GenericServer do
+  @moduledoc false
+
   use GenServer
   require Logger
 

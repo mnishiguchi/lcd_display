@@ -1,8 +1,14 @@
 defmodule LcdDisplay.ILI9486 do
+  @moduledoc """
+  Driver for ILI9486-based graphic LCD panels.
+  """
+
   use LcdDisplay.DisplayDriver, driver_impl: LcdDisplay.ILI9486.DriverImpl
 end
 
 defmodule LcdDisplay.ILI9486.DriverImpl do
+  @moduledoc false
+
   require Logger
   import Bitwise
 
