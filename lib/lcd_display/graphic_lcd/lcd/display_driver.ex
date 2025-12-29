@@ -52,7 +52,9 @@ defmodule LcdDisplay.DisplayDriver.DisplayContract do
 end
 
 defmodule LcdDisplay.DisplayDriver.GenericServer do
-  @moduledoc false
+  @moduledoc """
+  Internal server module used by `LcdDisplay.DisplayDriver`.
+  """
 
   use GenServer
   require Logger
